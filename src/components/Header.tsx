@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { Search, FileText, Info } from "lucide-react";
 
 export const Header = () => {
@@ -29,11 +30,15 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-2">
+          <LanguageToggle />
           <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
             <Link to="/cases">
               <Search className="h-5 w-5" />
               <span className="sr-only">Search cases</span>
             </Link>
+          </Button>
+          <Button asChild variant="outline" className="hidden md:inline-flex">
+            <Link to="/report">Report Case</Link>
           </Button>
           <Button asChild>
             <Link to="/cases">View Cases</Link>

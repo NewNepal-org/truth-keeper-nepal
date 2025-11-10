@@ -146,6 +146,28 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-to-br from-primary to-navy-dark">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold text-primary-foreground mb-4">
+                Know About a Case of Corruption?
+              </h2>
+              <p className="text-lg text-primary-foreground/80 mb-8">
+                Help us hold public entities accountable. Report allegations of misconduct and contribute to transparency in governance.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+                  <Link to="/report">Report an Allegation</Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+                  <Link to="/feedback">Submit Feedback</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

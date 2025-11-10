@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import Cases from "./pages/Cases";
 import About from "./pages/About";
 import CaseDetail from "./pages/CaseDetail";
+import EntityProfile from "./pages/EntityProfile";
+import ReportAllegation from "./pages/ReportAllegation";
+import EntityResponse from "./pages/EntityResponse";
+import ModerationDashboard from "./pages/ModerationDashboard";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +26,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/case/:id" element={<CaseDetail />} />
+          <Route path="/entity/:id" element={<EntityProfile />} />
+          <Route path="/report" element={<ReportAllegation />} />
+          <Route path="/entity-response/:id" element={<EntityResponse />} />
+          <Route path="/moderation" element={<ModerationDashboard />} />
+          <Route path="/feedback" element={<Feedback />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

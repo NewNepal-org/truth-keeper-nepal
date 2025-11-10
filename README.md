@@ -1,3 +1,52 @@
+# Public Accountability Platform (PAP) - Nepal
+
+A civic tech platform built by Let's Build Nepal (LBN) and NewNepal.org to promote transparency and accountability in Nepali governance by documenting corruption cases and holding public entities accountable.
+
+## Features Implemented
+
+### Public-Facing Features
+- **Landing Page** (`/`) - Hero section, statistics, featured cases, and mission statement
+- **Cases Directory** (`/cases`) - Searchable and filterable list of all corruption cases
+- **Case Details** (`/case/:id`) - Detailed view of individual cases with timeline, allegations, evidence, audit trail
+- **Entity Profiles** (`/entity/:id`) - Individual profiles for politicians, bureaucrats, and organizations showing all related allegations
+- **About Page** (`/about`) - Mission, values, partners, and platform information
+
+### Contributor Features
+- **Report Allegation** (`/report`) - Form for citizens to submit new allegations
+  - Anonymous or named submissions
+  - File upload support for evidence
+  - Source documentation
+  - Allegation categorization
+
+### Entity Features
+- **Entity Response** (`/entity-response/:id`) - Interface for entities to respond to allegations
+  - Identity verification workflow
+  - Side-by-side display with allegations
+  - Supporting document upload
+
+### Admin/Moderation Features
+- **Moderation Dashboard** (`/moderation`) - Review and approve submissions
+  - Pending submissions queue
+  - Review workflow
+  - Status management
+  - Internal notes and verification
+
+### Platform Features
+- **Feedback System** (`/feedback`) - Platform improvement suggestions and bug reports
+- **Bilingual Support** - Language toggle for English/Nepali (UI component ready)
+- **Audit Trail** - Complete history of case modifications with timestamps and users
+- **Responsive Design** - Mobile, tablet, and desktop optimized
+
+## Design System
+
+The platform uses a professional design system with semantic tokens:
+- **Primary Colors**: Navy blue for trust and authority
+- **Accent Colors**: Amber for warnings, emerald for success
+- **Typography**: Clear hierarchy with proper contrast
+- **Components**: Fully themed shadcn components
+
+---
+
 # Welcome to your Lovable project
 
 ## Project info

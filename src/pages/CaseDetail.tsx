@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AuditTrail } from "@/components/AuditTrail";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,37 @@ const CaseDetail = () => {
       { title: "Kathmandu Post Investigation Report", url: "#", date: "March 10, 2024" },
       { title: "Civil Society Statement", url: "#", date: "February 28, 2024" },
     ],
+    auditTrail: [
+      {
+        id: "1",
+        action: "created" as const,
+        description: "Case submitted by anonymous contributor",
+        user: "Anonymous",
+        timestamp: "2024-02-20T10:30:00Z"
+      },
+      {
+        id: "2",
+        action: "updated" as const,
+        description: "Additional evidence and sources added",
+        user: "Moderator: John Doe",
+        timestamp: "2024-02-25T14:15:00Z",
+        changes: ["Added audit report", "Updated timeline"]
+      },
+      {
+        id: "3",
+        action: "verified" as const,
+        description: "Case information verified against official CIAA records",
+        user: "Moderator: Jane Smith",
+        timestamp: "2024-03-01T09:00:00Z"
+      },
+      {
+        id: "4",
+        action: "published" as const,
+        description: "Case published to public platform",
+        user: "Admin: Sarah Johnson",
+        timestamp: "2024-03-15T16:45:00Z"
+      }
+    ]
   };
 
   const statusConfig = {
@@ -212,7 +244,7 @@ const CaseDetail = () => {
           </Card>
 
           {/* Sources */}
-          <Card>
+          <Card className="mb-8">
             <CardHeader>
               <CardTitle>Sources & References</CardTitle>
             </CardHeader>
@@ -236,6 +268,9 @@ const CaseDetail = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Audit Trail */}
+          <AuditTrail entries={caseData.auditTrail} />
         </div>
       </main>
 
