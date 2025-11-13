@@ -127,8 +127,13 @@ const CaseDetail = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center text-muted-foreground">
-                <User className="mr-2 h-5 w-5" />
-                <span className="text-sm">{caseData.entity}</span>
+                <User className="mr-2 h-5 w-5 flex-shrink-0" />
+                <Link 
+                  to={`/entity/${id}`}
+                  className="text-sm hover:text-primary hover:underline transition-colors"
+                >
+                  {caseData.entity}
+                </Link>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="mr-2 h-5 w-5" />

@@ -44,8 +44,14 @@ export const CaseCard = ({ id, title, entity, location, date, status, severity, 
           <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{description}</p>
           <div className="space-y-2">
             <div className="flex items-center text-sm text-muted-foreground">
-              <User className="mr-2 h-4 w-4" />
-              <span className="line-clamp-1">{entity}</span>
+              <User className="mr-2 h-4 w-4 flex-shrink-0" />
+              <Link 
+                to={`/entity/${id}`}
+                className="line-clamp-1 hover:text-primary hover:underline transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {entity}
+              </Link>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="mr-2 h-4 w-4" />

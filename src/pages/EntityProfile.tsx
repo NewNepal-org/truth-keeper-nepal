@@ -1,11 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AllegationTimeline } from "@/components/AllegationTimeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, User, MapPin, Calendar, FileText, AlertCircle, TrendingUp, BarChart3, ExternalLink } from "lucide-react";
+import { Building2, User, MapPin, Calendar, FileText, AlertCircle, TrendingUp, BarChart3, ExternalLink, Phone, Mail, Globe, Tag } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export default function EntityProfile() {
@@ -20,9 +21,14 @@ export default function EntityProfile() {
     position: "Former Minister of Finance",
     organization: "Government of Nepal",
     location: "Kathmandu, Nepal",
+    address: "Singh Durbar, Kathmandu 44600, Nepal",
+    phone: "+977-1-4211512",
+    email: "info@moinfra.gov.np",
+    website: "https://www.moinfra.gov.np",
     activeSince: "2015-01-01",
     photoUrl: "/placeholder.svg",
     description: "The Ministry of Infrastructure Development is responsible for planning, development, and maintenance of transportation infrastructure including roads, bridges, and airports across Nepal. The ministry oversees major development projects and allocates significant public funds for infrastructure improvement.",
+    corruptionCategories: ["Misappropriation of Funds", "Procurement Fraud", "Conflict of Interest", "Budget Overruns"],
     allegations: [
       {
         id: "1",
@@ -69,7 +75,9 @@ export default function EntityProfile() {
       lowSeverity: 1,
       resolved: 1,
       underInvestigation: 2,
-      verified: 1
+      verified: 1,
+      confirmed: 1,
+      ongoing: 2
     }
   };
 
@@ -128,11 +136,11 @@ export default function EntityProfile() {
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex-shrink-0">
-                  <div className="h-32 w-32 rounded-lg bg-muted flex items-center justify-center">
+                  <div className="h-40 w-40 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-border">
                     {entity.type === "individual" ? (
-                      <User className="h-16 w-16 text-muted-foreground" />
+                      <User className="h-20 w-20 text-primary" />
                     ) : (
-                      <Building2 className="h-16 w-16 text-muted-foreground" />
+                      <Building2 className="h-20 w-20 text-primary" />
                     )}
                   </div>
                 </div>
@@ -141,29 +149,42 @@ export default function EntityProfile() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h1 className="text-3xl font-bold text-foreground mb-2">{entity.name}</h1>
-                      <p className="text-lg text-muted-foreground">{entity.position}</p>
+                      <p className="text-lg text-muted-foreground mb-3">{entity.position}</p>
+                      {entity.entityType && (
+                        <Badge variant="secondary" className="text-sm">{entity.entityType}</Badge>
+                      )}
                     </div>
                     <Badge variant="outline" className="text-sm">
                       {entity.type === "individual" ? "Individual" : "Organization"}
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-4">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Building2 className="h-4 w-4" />
+                      <Building2 className="h-4 w-4 flex-shrink-0" />
                       <span>{entity.organization}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{entity.location}</span>
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <span>{entity.address}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
+                      <Phone className="h-4 w-4 flex-shrink-0" />
+                      <span>{entity.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Mail className="h-4 w-4 flex-shrink-0" />
+                      <span>{entity.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Globe className="h-4 w-4 flex-shrink-0" />
+                      <a href={entity.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                        {entity.website}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
                       <span>Active since {new Date(entity.activeSince).getFullYear()}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <FileText className="h-4 w-4" />
-                      <span>{entity.allegations.length} allegations</span>
                     </div>
                   </div>
                 </div>
@@ -175,20 +196,29 @@ export default function EntityProfile() {
                 <h3 className="font-semibold text-foreground mb-2">
                   {entity.type === "individual" ? "Biography" : "Description"}
                 </h3>
-                <p className="text-muted-foreground">{entity.description}</p>
+                <p className="text-muted-foreground leading-relaxed">{entity.description}</p>
               </div>
               
-              {entity.entityType && (
-                <div className="mt-4">
-                  <span className="text-sm font-semibold text-muted-foreground">Entity Type: </span>
-                  <Badge variant="secondary">{entity.entityType}</Badge>
+              {entity.corruptionCategories && entity.corruptionCategories.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Corruption Categories
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {entity.corruptionCategories.map((category, index) => (
+                      <Badge key={index} variant="outline" className="bg-destructive/5 text-destructive border-destructive/20">
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Statistics Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Cases</CardTitle>
@@ -201,21 +231,31 @@ export default function EntityProfile() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">High Severity</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed Cases</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-destructive">{entity.statistics.highSeverity}</div>
-                <p className="text-xs text-muted-foreground mt-1">Critical cases requiring urgent attention</p>
+                <div className="text-3xl font-bold text-destructive">{entity.statistics.confirmed}</div>
+                <p className="text-xs text-muted-foreground mt-1">Verified and confirmed</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Under Investigation</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Ongoing Cases</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-warning">{entity.statistics.underInvestigation}</div>
-                <p className="text-xs text-muted-foreground mt-1">Active investigations</p>
+                <div className="text-3xl font-bold text-warning">{entity.statistics.ongoing}</div>
+                <p className="text-xs text-muted-foreground mt-1">Currently active</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Resolved Cases</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-success">{entity.statistics.resolved}</div>
+                <p className="text-xs text-muted-foreground mt-1">Completed and closed</p>
               </CardContent>
             </Card>
           </div>
@@ -341,52 +381,18 @@ export default function EntityProfile() {
             </CardContent>
           </Card>
 
-          {/* Allegations Section */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Allegations
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {entity.allegations.map((allegation) => (
-                <Card key={allegation.id} className="border-l-4 border-l-primary">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                      <Link to={`/case/${allegation.id}`} className="text-lg font-semibold text-foreground hover:text-primary transition-colors">
-                        {allegation.title}
-                      </Link>
-                      <div className="flex gap-2 flex-wrap">
-                        <Badge className={statusConfig[allegation.status as keyof typeof statusConfig].className}>
-                          {statusConfig[allegation.status as keyof typeof statusConfig].label}
-                        </Badge>
-                        <Badge className={severityConfig[allegation.severity as keyof typeof severityConfig].className}>
-                          {severityConfig[allegation.severity as keyof typeof severityConfig].label}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Reported on {new Date(allegation.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
-                    
-                    {/* Show response if exists */}
-                    {entity.responses.find(r => r.allegationId === allegation.id) && (
-                      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-semibold text-foreground">Entity Response</span>
-                          <Badge variant="outline" className="text-xs">Verified</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {entity.responses.find(r => r.allegationId === allegation.id)?.content}
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
+          {/* Allegations Timeline */}
+          <div className="mb-8">
+            <AllegationTimeline 
+              allegations={entity.allegations.map(a => ({
+                id: a.id,
+                title: a.title,
+                date: a.date,
+                status: a.status as "verified" | "under-investigation" | "resolved",
+                severity: a.severity as "high" | "medium" | "low"
+              }))}
+            />
+          </div>
 
           {/* Related Reforms Section */}
           <Card className="mb-8">
