@@ -81,7 +81,11 @@ export interface TimelineEvent {
   description?: string;
 }
 
-// API Functions
+// =============================
+// CORRECTED API ENDPOINTS HERE
+// =============================
+
+// Fetch all entities
 export const getEntities = async (params?: {
   type?: string;
   subtype?: string;
@@ -90,7 +94,8 @@ export const getEntities = async (params?: {
   limit?: number;
 }) => {
   try {
-    const response = await api.get('/entities', { params });
+    // Correct backend endpoint: /entity
+    const response = await api.get('/entity', { params });
     return response.data;
   } catch (error) {
     console.error('Failed to fetch entities:', error);
@@ -98,9 +103,11 @@ export const getEntities = async (params?: {
   }
 };
 
+// Fetch single entity
 export const getEntityById = async (id: string): Promise<Entity> => {
   try {
-    const response = await api.get(`/entities/${id}`);
+    // Correct backend endpoint: /entity/{id}
+    const response = await api.get(`/entity/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch entity ${id}:`, error);
@@ -108,9 +115,10 @@ export const getEntityById = async (id: string): Promise<Entity> => {
   }
 };
 
+// Fetch versions for entity
 export const getEntityVersions = async (id: string) => {
   try {
-    const response = await api.get(`/entities/${id}/versions`);
+    const response = await api.get(`/entity/${id}/versions`);
     return response.data;
   } catch (error) {
     console.warn(`Versions endpoint not available for entity ${id}`);
@@ -118,13 +126,15 @@ export const getEntityVersions = async (id: string) => {
   }
 };
 
+// Fetch relationships
 export const getRelationships = async (params?: {
   source_id?: string;
   target_id?: string;
   type?: string;
 }) => {
   try {
-    const response = await api.get('/relationships', { params });
+    // Correct backend endpoint: /relationship
+    const response = await api.get('/relationship', { params });
     return response.data;
   } catch (error) {
     console.warn('Relationships endpoint not available');
@@ -132,6 +142,7 @@ export const getRelationships = async (params?: {
   }
 };
 
+// Search entities
 export const searchEntities = async (query: string, params?: {
   type?: string;
   subtype?: string;
@@ -139,7 +150,8 @@ export const searchEntities = async (query: string, params?: {
   limit?: number;
 }) => {
   try {
-    const response = await api.get('/search', { 
+    // Correct backend endpoint: /entity/search?q=
+    const response = await api.get('/entity/search', { 
       params: { q: query, ...params } 
     });
     return response.data;
@@ -149,13 +161,8 @@ export const searchEntities = async (query: string, params?: {
   }
 };
 
-// Mock functions for allegations and cases (until backend implements these)
+// Mock functions for allegations & cases (backend not implemented yet)
 export const getEntityAllegations = async (id: string): Promise<Allegation[]> => {
-  // TODO: Replace with actual API call when backend is ready
-  // const response = await api.get(`/entities/${id}/allegations`);
-  // return response.data;
-  
-  // Mock data for now
   return [
     {
       id: '1',
@@ -171,11 +178,6 @@ export const getEntityAllegations = async (id: string): Promise<Allegation[]> =>
 };
 
 export const getEntityCases = async (id: string): Promise<Case[]> => {
-  // TODO: Replace with actual API call when backend is ready
-  // const response = await api.get(`/entities/${id}/cases`);
-  // return response.data;
-  
-  // Mock data for now
   return [
     {
       id: '1',
