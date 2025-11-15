@@ -89,13 +89,23 @@ export const getEntities = async (params?: {
   page?: number;
   limit?: number;
 }) => {
-  const response = await api.get('/entities', { params });
-  return response.data;
+  try {
+    const response = await api.get('/entities', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch entities:', error);
+    throw error;
+  }
 };
 
 export const getEntityById = async (id: string): Promise<Entity> => {
-  const response = await api.get(`/entities/${id}`);
-  return response.data;
+  try {
+    const response = await api.get(`/entities/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch entity ${id}:`, error);
+    throw error;
+  }
 };
 
 export const getEntityVersions = async (id: string) => {
@@ -122,9 +132,21 @@ export const getRelationships = async (params?: {
   }
 };
 
-export const searchEntities = async (query: string) => {
-  const response = await api.get('/search', { params: { q: query } });
-  return response.data;
+export const searchEntities = async (query: string, params?: {
+  type?: string;
+  subtype?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  try {
+    const response = await api.get('/search', { 
+      params: { q: query, ...params } 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Search failed:', error);
+    throw error;
+  }
 };
 
 // Mock functions for allegations and cases (until backend implements these)
