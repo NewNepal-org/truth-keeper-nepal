@@ -43,16 +43,57 @@ const CaseDetail = () => {
       { name: "Director B", role: "Ministry of Physical Infrastructure", status: "Under investigation" },
       { name: "XYZ Construction Pvt. Ltd.", role: "Contractor", status: "Under investigation" },
     ],
-    evidence: [
-      "Internal audit report highlighting fund discrepancies",
-      "Whistleblower testimonies from department employees",
-      "Financial transaction records showing irregular payments",
-      "Comparative market analysis showing overpriced materials",
-    ],
-    sources: [
-      { title: "CIAA Official Statement", url: "#", date: "March 15, 2024" },
-      { title: "Kathmandu Post Investigation Report", url: "#", date: "March 10, 2024" },
-      { title: "Civil Society Statement", url: "#", date: "February 28, 2024" },
+    evidenceAndSources: [
+      { 
+        title: "Internal Audit Report", 
+        type: "document", 
+        description: "Comprehensive audit report highlighting fund discrepancies and irregularities in the project allocation.",
+        link: "#",
+        uploadedFile: "audit-report-2024.pdf"
+      },
+      { 
+        title: "Whistleblower Testimonies", 
+        type: "legal record", 
+        description: "Sworn testimonies from department employees detailing alleged misconduct and irregularities.",
+        uploadedFile: "testimonies-compilation.pdf"
+      },
+      { 
+        title: "Financial Transaction Records", 
+        type: "document", 
+        description: "Bank statements and transaction records showing irregular payments to contractors and third parties.",
+        link: "#",
+        uploadedFile: "financial-records.xlsx"
+      },
+      { 
+        title: "Comparative Market Analysis", 
+        type: "document", 
+        description: "Independent analysis comparing project material costs with market rates, showing 40% overpricing.",
+        link: "#"
+      },
+      { 
+        title: "CIAA Official Statement", 
+        type: "article", 
+        description: "Official statement from the Commission for Investigation of Abuse of Authority announcing the investigation.",
+        link: "#"
+      },
+      { 
+        title: "Kathmandu Post Investigation Report", 
+        type: "article", 
+        description: "In-depth investigative journalism piece detailing the allegations and initial findings.",
+        link: "#"
+      },
+      { 
+        title: "Site Inspection Photos", 
+        type: "photo", 
+        description: "Documentary photographs from the construction site showing substandard work and materials.",
+        uploadedFile: "site-photos.zip"
+      },
+      { 
+        title: "Civil Society Statement", 
+        type: "article", 
+        description: "Joint statement from multiple civil society organizations calling for transparent investigation.",
+        link: "#"
+      },
     ],
     auditTrail: [
       {
@@ -231,44 +272,40 @@ const CaseDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Evidence */}
+          {/* Evidence & Sources */}
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Documentary Evidence</CardTitle>
+              <CardTitle>Evidence & Sources</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {caseData.evidence.map((item, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-primary mr-2">•</span>
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Sources */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Sources & References</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {caseData.sources.map((source, index) => (
-                  <a
-                    key={index}
-                    href={source.url}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                        {source.title}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{source.date}</p>
+              <div className="space-y-4">
+                {caseData.evidenceAndSources.map((item, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-foreground">{item.title}</h4>
+                      <Badge variant="secondary" className="capitalize">{item.type}</Badge>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </a>
+                    <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
+                    <div className="flex flex-wrap gap-3">
+                      {item.link && (
+                        <a 
+                          href={item.link} 
+                          className="flex items-center text-sm text-primary hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                          View Source
+                        </a>
+                      )}
+                      {item.uploadedFile && (
+                        <span className="flex items-center text-sm text-muted-foreground">
+                          <FileText className="h-3.5 w-3.5 mr-1" />
+                          {item.uploadedFile}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </CardContent>
