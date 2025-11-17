@@ -224,20 +224,26 @@ export async function searchEntities(
  * 
  * Backend endpoint: GET /entities/{id}
  * 
- * @param idOrSlug - Entity ID or slug
+ * @param idOrSlug - Entity ID (e.g., 'entity:person/prabin-shahi') or slug
  * @returns Promise<Entity>
  * 
  * @example
  * ```typescript
- * const entity = await getEntityById('pushpa-kamal-dahal-prachanda');
+ * // Using NES entity ID format
+ * const entity = await getEntityById('entity:person/prabin-shahi');
+ * // Using simple slug
+ * const entity2 = await getEntityById('pushpa-kamal-dahal-prachanda');
  * ```
  */
 export async function getEntityById(idOrSlug: string): Promise<Entity> {
   try {
-    const response = await api.get<Entity>(`/entities/${idOrSlug}`);
+    // URL-encode the entity ID to handle NES format (entity:type/slug)
+    const encodedId = encodeURIComponent(idOrSlug);
+    const response = await api.get<Entity>(`/entities/${encodedId}`);
     return response.data;
   } catch (error) {
-    handleApiError(error, `/entities/${idOrSlug}`);
+    const encodedId = encodeURIComponent(idOrSlug);
+    handleApiError(error, `/entities/${encodedId}`);
   }
 }
 
@@ -256,17 +262,19 @@ export async function getEntityBySlug(slug: string): Promise<Entity> {
  * 
  * Backend endpoint: GET /entities/{id}/versions
  * 
- * @param idOrSlug - Entity ID or slug
+ * @param idOrSlug - Entity ID (e.g., 'entity:person/prabin-shahi') or slug
  * @returns Promise<VersionListResponse>
  * 
  * @example
  * ```typescript
- * const versions = await getEntityVersions('pushpa-kamal-dahal-prachanda');
+ * const versions = await getEntityVersions('entity:person/prabin-shahi');
  * ```
  */
 export async function getEntityVersions(idOrSlug: string): Promise<VersionListResponse> {
   try {
-    const response = await api.get<VersionListResponse>(`/entities/${idOrSlug}/versions`);
+    // URL-encode the entity ID to handle NES format (entity:type/slug)
+    const encodedId = encodeURIComponent(idOrSlug);
+    const response = await api.get<VersionListResponse>(`/entities/${encodedId}/versions`);
     return response.data;
   } catch (error) {
     console.warn(`Version history not available for entity ${idOrSlug}`);
@@ -318,12 +326,13 @@ export async function getRelationships(
 /**
  * Get allegations for an entity
  * 
- * @param idOrSlug - Entity ID or slug
+ * @param idOrSlug - Entity ID (e.g., 'entity:person/prabin-shahi') or slug
  * @returns Promise<Allegation[]> - Allegations from JDS API mapped to PAP format
  */
 export async function getEntityAllegations(idOrSlug: string): Promise<Allegation[]> {
   try {
     const { getAllegationsByEntity } = await import('./jds-api');
+    // URL-encode the entity ID for JDS API query
     const jdsAllegations = await getAllegationsByEntity(idOrSlug);
     
     // Map JDS allegations to PAP Allegation format
