@@ -2,6 +2,7 @@ import { Entity } from "@/services/api";
 import { Building2, User, Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getPrimaryName, getAttribute, getEmail, getPhone, getWebsite, getDescription, formatSubType } from "@/utils/nes-helpers";
 
 interface EntityProfileHeaderProps {
@@ -25,18 +26,24 @@ const EntityProfileHeader = ({
   const website = getWebsite(entity.contacts);
   const description = getDescription(entity.description, 'en');
   
+  // Get photo URL from entity pictures
+  const photoUrl = entity.pictures?.find(p => p.type === 'thumb' || p.type === 'full')?.url;
+  
   return (
     <Card className="mb-6">
       <CardContent className="pt-6">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Photo/Avatar */}
-          <div className="w-32 h-32 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-            {isOrganization ? (
-              <Building2 className="w-16 h-16 text-muted-foreground" />
-            ) : (
-              <User className="w-16 h-16 text-muted-foreground" />
-            )}
-          </div>
+          <Avatar className="w-32 h-32 rounded-lg flex-shrink-0">
+            <AvatarImage src={photoUrl} alt={primaryName} className="object-cover" />
+            <AvatarFallback className="rounded-lg bg-muted">
+              {isOrganization ? (
+                <Building2 className="w-16 h-16 text-muted-foreground" />
+              ) : (
+                <User className="w-16 h-16 text-muted-foreground" />
+              )}
+            </AvatarFallback>
+          </Avatar>
 
           {/* Basic Info */}
           <div className="flex-1">
