@@ -6,14 +6,41 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Filter } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, Filter, AlertCircle } from "lucide-react";
 import { getAllegations } from "@/services/jds-api";
 import type { Allegation } from "@/types/jds";
 import { toast } from "sonner";
 
+// Retry helper for rate-limited requests
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  initialDelay = 1000
+): Promise<T> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const isRateLimited = error?.statusCode === 429 || error?.message?.includes('429');
+      const isLastAttempt = i === maxRetries - 1;
+      
+      if (isRateLimited && !isLastAttempt) {
+        const delay = initialDelay * Math.pow(2, i);
+        console.log(`Rate limited. Retrying in ${delay}ms... (attempt ${i + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
 const Cases = () => {
   const [cases, setCases] = useState<Allegation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -24,15 +51,25 @@ const Cases = () => {
 
   const fetchCases = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await getAllegations({
-        state: 'current', // Only show current/active cases
-        page: 1
-      });
+      const response = await retryWithBackoff(
+        () => getAllegations({
+          state: 'current',
+          page: 1
+        }),
+        3,
+        2000
+      );
       setCases(response.results);
-    } catch (error) {
-      console.error("Failed to fetch cases:", error);
-      toast.error("Failed to load cases. Please try again.");
+    } catch (err: any) {
+      console.error("Failed to fetch cases:", err);
+      const isRateLimited = err?.statusCode === 429 || err?.message?.includes('429');
+      const errorMessage = isRateLimited 
+        ? "Too many requests. Please wait a moment and try again."
+        : "Failed to load cases. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setCases([]);
     } finally {
       setLoading(false);
@@ -125,6 +162,18 @@ const Cases = () => {
           </div>
 
           {/* Cases Grid */}
+          {error ? (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{error}</span>
+                <Button variant="outline" size="sm" onClick={fetchCases} className="ml-4">
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -156,7 +205,9 @@ const Cases = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg mb-4">No cases found matching your criteria</p>
+              <p className="text-muted-foreground text-lg mb-4">
+                {error ? "Unable to load cases at this time" : "No cases found matching your criteria"}
+              </p>
               <Button 
                 variant="outline" 
                 onClick={() => {
@@ -166,7 +217,7 @@ const Cases = () => {
                   fetchCases();
                 }}
               >
-                Clear All Filters
+                {error ? "Try Again" : "Clear All Filters"}
               </Button>
             </div>
           )}
