@@ -4,7 +4,7 @@
  * API client for the accountability and allegations service.
  * 
  * Reference: Jawafdehi_API-2.yaml
- * Environment Variable: VITE_JDS_API_BASE_URL (default: https://mp55ce3b24df0bd1c9ea.free.beeceptor.com/api)
+ * Environment Variable: VITE_JDS_API_BASE_URL (default: https://api.jawafdehi.newnepal.org/api)
  */
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -33,7 +33,7 @@ import type {
 // API Configuration
 // ============================================================================
 
-const JDS_API_BASE_URL = import.meta.env.VITE_JDS_API_BASE_URL || 'https://mp55ce3b24df0bd1c9ea.free.beeceptor.com/api';
+const JDS_API_BASE_URL = import.meta.env.VITE_JDS_API_BASE_URL || 'https://api.jawafdehi.newnepal.org/api';
 
 const jdsApi: AxiosInstance = axios.create({
   baseURL: JDS_API_BASE_URL,
