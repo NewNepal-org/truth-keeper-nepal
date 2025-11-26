@@ -99,19 +99,14 @@
     "overview": "Case Overview",
     "allegations": "Key Allegations",
     "timeline": "Case Timeline",
+    "audit_history": "Case History",
     "partiesInvolved": "Parties Involved",
-    "evidenceSources": "Evidence & Sources",
+    "evidence": "Evidence & Sources",
     "viewSource": "View Source",
     "status": {
       "ongoing": "Ongoing",
       "resolved": "Resolved",
       "underInvestigation": "Under Investigation"
-    },
-    "severityLevels": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "critical": "Critical"
     }
   },
   "entities": {

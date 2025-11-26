@@ -11,8 +11,10 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar, MapPin, User, FileText, AlertTriangle, ArrowLeft, ExternalLink, AlertCircle } from "lucide-react";
-import { getCaseById } from "@/services/jds-api";
-import type { CaseDetail as CaseDetailType } from "@/types/jds";
+import { getCaseById, getDocumentSourceById } from "@/services/jds-api";
+import { getEntityById } from "@/services/api";
+import type { CaseDetail as CaseDetailType, DocumentSource } from "@/types/jds";
+import type { Entity } from "@/types/nes";
 import { toast } from "sonner";
 
 const CaseDetail = () => {
@@ -21,6 +23,8 @@ const CaseDetail = () => {
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedSources, setResolvedSources] = useState<Record<number, DocumentSource>>({});
+  const [resolvedEntities, setResolvedEntities] = useState<Record<string, Entity>>({});
 
   useEffect(() => {
     const fetchCase = async () => {
@@ -32,6 +36,42 @@ const CaseDetail = () => {
       try {
         const data = await getCaseById(parseInt(id));
         setCaseData(data);
+        
+        // Resolve evidence sources
+        const sourcePromises = data.evidence.map(async (evidence) => {
+          try {
+            const source = await getDocumentSourceById(evidence.source_id);
+            return { id: evidence.source_id, source };
+          } catch {
+            return null;
+          }
+        });
+        
+        const sources = await Promise.all(sourcePromises);
+        const sourcesMap = sources.reduce((acc, item) => {
+          if (item) acc[item.id] = item.source;
+          return acc;
+        }, {} as Record<number, DocumentSource>);
+        setResolvedSources(sourcesMap);
+        
+        // Resolve entities
+        const allEntityIds = [...data.alleged_entities, ...data.related_entities, ...data.locations];
+        const entityPromises = allEntityIds.map(async (entityId) => {
+          try {
+            const entity = await getEntityById(entityId);
+            return { id: entityId, entity };
+          } catch {
+            return null;
+          }
+        });
+        
+        const entities = await Promise.all(entityPromises);
+        const entitiesMap = entities.reduce((acc, item) => {
+          if (item) acc[item.id] = item.entity;
+          return acc;
+        }, {} as Record<string, Entity>);
+        setResolvedEntities(entitiesMap);
+        
       } catch (err) {
         console.error("Failed to fetch case:", err);
         setError(t("caseDetail.failedToLoad"));
@@ -115,7 +155,7 @@ const CaseDetail = () => {
                 {t("caseDetail.status.ongoing")}
               </Badge>
               <Badge variant="outline" className={caseData.case_type === 'CORRUPTION' ? 'bg-destructive/20 text-destructive' : 'bg-orange-500/20 text-orange-700'}>
-                {caseData.case_type === 'CORRUPTION' ? t("cases.type.corruption") : t("cases.type.brokenPromise")} {t("caseDetail.severity")}
+                {caseData.case_type === 'CORRUPTION' ? t("cases.type.corruption") : t("cases.type.brokenPromise")}
               </Badge>
               {caseData.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">
@@ -129,13 +169,37 @@ const CaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center text-muted-foreground">
                 <User className="mr-2 h-5 w-5 flex-shrink-0" />
-                <span className="text-sm">
-                  {caseData.alleged_entities.join(', ')}
-                </span>
+                <div className="text-sm flex flex-wrap gap-1">
+                  {caseData.alleged_entities.map((entityId, index) => {
+                    const entity = resolvedEntities[entityId];
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                    return (
+                      <span key={entityId}>
+                        <Link to={`/entity/${encodeURIComponent(entityId)}`} className="text-primary hover:underline">
+                          {displayName}
+                        </Link>
+                        {index < caseData.alleged_entities.length - 1 && ', '}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="mr-2 h-5 w-5" />
-                <span className="text-sm">{caseData.locations[0] || 'N/A'}</span>
+                <div className="text-sm flex flex-wrap gap-1">
+                  {caseData.locations.length > 0 ? caseData.locations.map((locationId, index) => {
+                    const entity = resolvedEntities[locationId];
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || locationId;
+                    return (
+                      <span key={locationId}>
+                        <Link to={`/entity/${encodeURIComponent(locationId)}`} className="text-primary hover:underline">
+                          {displayName}
+                        </Link>
+                        {index < caseData.locations.length - 1 && ', '}
+                      </span>
+                    );
+                  }) : 'N/A'}
+                </div>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <Calendar className="mr-2 h-5 w-5" />
@@ -155,7 +219,10 @@ const CaseDetail = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{caseData.description}</p>
+              <div 
+                className="text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: caseData.description }}
+              />
             </CardContent>
           </Card>
 
@@ -213,6 +280,51 @@ const CaseDetail = () => {
             </Card>
           )}
 
+          {/* Evidence */}
+          {caseData.evidence.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="mr-2 h-5 w-5" />
+                  {t("caseDetail.evidence")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {caseData.evidence.map((evidence, index) => {
+                    const source = resolvedSources[evidence.source_id];
+                    return (
+                      <div key={index} className="flex items-start p-3 border rounded-lg">
+                        <FileText className="mr-3 h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {source?.title || `Source ${evidence.source_id}`}
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {evidence.description}
+                          </p>
+                          {source?.description && (
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {source.description}
+                            </p>
+                          )}
+                          {source?.url && (
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={source.url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                View Source
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Related Entities */}
           {caseData.related_entities.length > 0 && (
             <Card className="mb-8">
@@ -221,35 +333,30 @@ const CaseDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {caseData.related_entities.map((entity, index) => (
-                    <div key={index} className="flex items-start justify-between p-3 rounded-lg bg-muted/50">
-                      <div>
-                        <p className="font-semibold text-foreground">{entity}</p>
-                        <p className="text-sm text-muted-foreground">{t("caseDetail.relatedEntity")}</p>
+                  {caseData.related_entities.map((entityId, index) => {
+                    const entity = resolvedEntities[entityId];
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                    return (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center">
+                          <User className="mr-3 h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{displayName}</p>
+                            {entity?.short_description?.en?.value && (
+                              <p className="text-sm text-muted-foreground">
+                                {entity.short_description.en.value}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/entity/${encodeURIComponent(entityId)}`}>
+                            View Profile
+                          </Link>
+                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Evidence */}
-          {caseData.evidence.length > 0 && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>{t("caseDetail.evidenceSources")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {caseData.evidence.map((item, index) => (
-                    <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{t("caseDetail.evidence")} #{item.source_id}</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -259,7 +366,7 @@ const CaseDetail = () => {
           {caseData.audit_history && (
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle>{t("caseDetail.auditTrail")}</CardTitle>
+                <CardTitle>{t("caseDetail.audit_history")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

@@ -99,19 +99,14 @@
     "overview": "मुद्दा अवलोकन",
     "allegations": "मुख्य आरोपहरू",
     "timeline": "मुद्दा समयरेखा",
+    "audit_history": "मुद्दा history",
     "partiesInvolved": "समावेश पक्षहरू",
-    "evidenceSources": "प्रमाण र स्रोतहरू",
+    "evidence": "प्रमाण र स्रोतहरू",
     "viewSource": "स्रोत हेर्नुहोस्",
     "status": {
       "ongoing": "चलिरहेको",
       "resolved": "समाधान भएको",
       "underInvestigation": "अनुसन्धानमा"
-    },
-    "severityLevels": {
-      "low": "कम",
-      "medium": "मध्यम",
-      "high": "उच्च",
-      "critical": "गम्भीर"
     }
   },
   "entities": {

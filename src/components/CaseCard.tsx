@@ -11,11 +11,13 @@ interface CaseCardProps {
   location: string;
   date: string;
   status: "ongoing" | "resolved" | "under-investigation";
-  severity: "low" | "medium" | "high" | "critical";
+  tags: string[];
   description: string;
+  entityIds?: string[];
+  locationIds?: string[];
 }
 
-export const CaseCard = ({ id, title, entity, location, date, status, severity, description }: CaseCardProps) => {
+export const CaseCard = ({ id, title, entity, location, date, status, tags, description, entityIds, locationIds }: CaseCardProps) => {
   const { t } = useTranslation();
 
   const statusConfig = {
@@ -24,12 +26,7 @@ export const CaseCard = ({ id, title, entity, location, date, status, severity, 
     "under-investigation": { label: t("caseCard.status.underInvestigation"), color: "bg-muted text-muted-foreground" },
   };
 
-  const severityConfig = {
-    low: { label: t("caseCard.severity.low"), color: "bg-slate-200 text-slate-700" },
-    medium: { label: t("caseCard.severity.medium"), color: "bg-yellow-500/20 text-yellow-700" },
-    high: { label: t("caseCard.severity.high"), color: "bg-orange-500/20 text-orange-700" },
-    critical: { label: t("caseCard.severity.critical"), color: "bg-destructive/20 text-destructive" },
-  };
+
 
   return (
     <Link to={`/case/${id}`}>
@@ -37,9 +34,18 @@ export const CaseCard = ({ id, title, entity, location, date, status, severity, 
         <CardHeader>
           <div className="flex items-start justify-between gap-2 mb-2">
             <Badge className={statusConfig[status].color}>{statusConfig[status].label}</Badge>
-            <Badge variant="outline" className={severityConfig[severity].color}>
-              {severityConfig[severity].label}
-            </Badge>
+            <div className="flex flex-wrap gap-1">
+              {tags.slice(0, 2).map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+              {tags.length > 2 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{tags.length - 2}
+                </Badge>
+              )}
+            </div>
           </div>
           {/* NOTE: Dynamic case content (title, description, entity names) from Entity API
               remains in English until API-side i18n is implemented. See GitHub issue for i18n. */}
@@ -50,17 +56,31 @@ export const CaseCard = ({ id, title, entity, location, date, status, severity, 
           <div className="space-y-2">
             <div className="flex items-center text-sm text-muted-foreground">
               <User className="mr-2 h-4 w-4 flex-shrink-0" />
-              <Link
-                to={`/entity/${id}`}
-                className="line-clamp-1 hover:text-primary hover:underline transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {entity}
-              </Link>
+              {entityIds && entityIds.length > 0 ? (
+                <Link
+                  to={`/entity/${encodeURIComponent(entityIds[0])}`}
+                  className="line-clamp-1 hover:text-primary hover:underline transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {entity}
+                </Link>
+              ) : (
+                <span className="line-clamp-1">{entity}</span>
+              )}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="mr-2 h-4 w-4" />
-              <span>{location}</span>
+              {locationIds && locationIds.length > 0 ? (
+                <Link
+                  to={`/entity/${encodeURIComponent(locationIds[0])}`}
+                  className="hover:text-primary hover:underline transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {location}
+                </Link>
+              ) : (
+                <span>{location}</span>
+              )}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="mr-2 h-4 w-4" />

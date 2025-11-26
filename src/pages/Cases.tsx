@@ -10,7 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, Filter, AlertCircle } from "lucide-react";
 import { getCases } from "@/services/jds-api";
+import { getEntityById } from "@/services/api";
 import type { Case } from "@/types/jds";
+import type { Entity } from "@/types/nes";
 import { toast } from "sonner";
 
 // Retry helper for rate-limited requests
@@ -47,6 +49,7 @@ const Cases = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [resolvedEntities, setResolvedEntities] = useState<Record<string, Entity>>({});
 
   useEffect(() => {
     fetchCases();
@@ -65,6 +68,25 @@ const Cases = () => {
         2000
       );
       setCases(response.results);
+      
+      // Resolve entities
+      const allEntityIds = response.results.flatMap(c => [...c.alleged_entities, ...c.locations]);
+      const uniqueEntityIds = [...new Set(allEntityIds)];
+      const entityPromises = uniqueEntityIds.map(async (entityId) => {
+        try {
+          const entity = await getEntityById(entityId);
+          return { id: entityId, entity };
+        } catch {
+          return null;
+        }
+      });
+      
+      const entities = await Promise.all(entityPromises);
+      const entitiesMap = entities.reduce((acc, item) => {
+        if (item) acc[item.id] = item.entity;
+        return acc;
+      }, {} as Record<string, Entity>);
+      setResolvedEntities(entitiesMap);
     } catch (err: unknown) {
       const typedError = err as { statusCode?: number; message?: string };
       console.error("Failed to fetch cases:", err);
@@ -195,12 +217,20 @@ const Cases = () => {
                   key={caseItem.id}
                   id={caseItem.id.toString()}
                   title={caseItem.title}
-                  entity={caseItem.alleged_entities.join(', ') || 'Unknown Entity'}
-                  location={caseItem.locations[0] || 'Unknown Location'}
+                  entity={caseItem.alleged_entities.map(entityId => {
+                    const entity = resolvedEntities[entityId];
+                    return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                  }).join(', ') || 'Unknown Entity'}
+                  location={caseItem.locations.map(locationId => {
+                    const entity = resolvedEntities[locationId];
+                    return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || locationId;
+                  }).join(', ') || 'Unknown Location'}
                   date={new Date(caseItem.created_at).toLocaleDateString()}
                   status="ongoing"
-                  severity={caseItem.case_type === 'CORRUPTION' ? 'critical' : 'high'}
+                  tags={caseItem.tags}
                   description={caseItem.key_allegations.join('. ')}
+                  entityIds={caseItem.alleged_entities}
+                  locationIds={caseItem.locations}
                 />
               ))}
             </div>
