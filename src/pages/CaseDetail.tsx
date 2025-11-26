@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar, MapPin, User, FileText, AlertTriangle, ArrowLeft, ExternalLink, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, User, FileText, AlertTriangle, ArrowLeft, ExternalLink, AlertCircle, RefreshCw } from "lucide-react";
 import { getCaseById, getDocumentSourceById } from "@/services/jds-api";
 import { getEntityById } from "@/services/api";
 import type { CaseDetail as CaseDetailType, DocumentSource } from "@/types/jds";
@@ -25,13 +25,14 @@ const CaseDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [resolvedSources, setResolvedSources] = useState<Record<number, DocumentSource>>({});
   const [resolvedEntities, setResolvedEntities] = useState<Record<string, Entity>>({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchCase = async () => {
-      if (!id) return;
-      
-      setLoading(true);
-      setError(null);
+  const fetchCase = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    setError(null);
+    setIsRefreshing(false);
       
       try {
         const data = await getCaseById(parseInt(id));
@@ -76,11 +77,18 @@ const CaseDetail = () => {
         console.error("Failed to fetch case:", err);
         setError(t("caseDetail.failedToLoad"));
         toast.error(t("caseDetail.failedToLoad"));
-      } finally {
-        setLoading(false);
-      }
-    };
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchCase();
+  };
+
+  useEffect(() => {
     fetchCase();
   }, [id, t]);
 
@@ -141,12 +149,23 @@ const CaseDetail = () => {
 
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-5xl">
-          <Button variant="ghost" asChild className="mb-6">
-            <Link to="/cases">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t("caseDetail.backToCases")}
-            </Link>
-          </Button>
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" asChild>
+              <Link to="/cases">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t("caseDetail.backToCases")}
+              </Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
 
           {/* Case Header */}
           <div className="mb-8">
