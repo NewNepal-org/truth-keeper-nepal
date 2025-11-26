@@ -11,7 +11,7 @@ interface CaseCardProps {
   location: string;
   date: string;
   status: "ongoing" | "resolved" | "under-investigation";
-  tags: string[];
+  tags?: string[];
   description: string;
   entityIds?: string[];
   locationIds?: string[];
@@ -35,12 +35,12 @@ export const CaseCard = ({ id, title, entity, location, date, status, tags, desc
           <div className="flex items-start justify-between gap-2 mb-2">
             <Badge className={statusConfig[status].color}>{statusConfig[status].label}</Badge>
             <div className="flex flex-wrap gap-1">
-              {tags.slice(0, 2).map((tag) => (
+              {tags?.slice(0, 2).map((tag) => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
                 </Badge>
               ))}
-              {tags.length > 2 && (
+              {tags && tags.length > 2 && (
                 <Badge variant="secondary" className="text-xs">
                   +{tags.length - 2}
                 </Badge>

@@ -227,7 +227,7 @@ const Cases = () => {
                   }).join(', ') || 'Unknown Location'}
                   date={new Date(caseItem.created_at).toLocaleDateString()}
                   status="ongoing"
-                  tags={caseItem.tags}
+                  tags={caseItem.tags || []}
                   description={caseItem.key_allegations.join('. ')}
                   entityIds={caseItem.alleged_entities}
                   locationIds={caseItem.locations}
