@@ -54,12 +54,15 @@ const CaseDetail = () => {
         }, {} as Record<number, DocumentSource>);
         setResolvedSources(sourcesMap);
         
-        // Resolve entities
-        const allEntityIds = [...data.alleged_entities, ...data.related_entities, ...data.locations];
-        const entityPromises = allEntityIds.map(async (entityId) => {
+        // Resolve entities from NES if they have nes_id
+        const allEntities = [...data.alleged_entities, ...data.related_entities, ...data.locations];
+        const entitiesWithNesId = allEntities.filter(e => e.nes_id);
+        const uniqueNesIds = [...new Set(entitiesWithNesId.map(e => e.nes_id!))];
+        
+        const entityPromises = uniqueNesIds.map(async (nesId) => {
           try {
-            const entity = await getEntityById(entityId);
-            return { id: entityId, entity };
+            const entity = await getEntityById(nesId);
+            return { id: nesId, entity };
           } catch {
             return null;
           }
@@ -170,14 +173,19 @@ const CaseDetail = () => {
               <div className="flex items-center text-muted-foreground">
                 <User className="mr-2 h-5 w-5 flex-shrink-0" />
                 <div className="text-sm flex flex-wrap gap-1">
-                  {caseData.alleged_entities.map((entityId, index) => {
-                    const entity = resolvedEntities[entityId];
-                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                  {caseData.alleged_entities.map((e, index) => {
+                    const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
+                    const linkId = e.nes_id || e.id.toString();
                     return (
-                      <span key={entityId}>
-                        <Link to={`/entity/${encodeURIComponent(entityId)}`} className="text-primary hover:underline">
-                          {displayName}
-                        </Link>
+                      <span key={e.id}>
+                        {e.nes_id ? (
+                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
+                            {displayName}
+                          </Link>
+                        ) : (
+                          <span>{displayName}</span>
+                        )}
                         {index < caseData.alleged_entities.length - 1 && ', '}
                       </span>
                     );
@@ -187,14 +195,19 @@ const CaseDetail = () => {
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="mr-2 h-5 w-5" />
                 <div className="text-sm flex flex-wrap gap-1">
-                  {caseData.locations.length > 0 ? caseData.locations.map((locationId, index) => {
-                    const entity = resolvedEntities[locationId];
-                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || locationId;
+                  {caseData.locations.length > 0 ? caseData.locations.map((e, index) => {
+                    const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
+                    const linkId = e.nes_id || e.id.toString();
                     return (
-                      <span key={locationId}>
-                        <Link to={`/entity/${encodeURIComponent(locationId)}`} className="text-primary hover:underline">
-                          {displayName}
-                        </Link>
+                      <span key={e.id}>
+                        {e.nes_id ? (
+                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
+                            {displayName}
+                          </Link>
+                        ) : (
+                          <span>{displayName}</span>
+                        )}
                         {index < caseData.locations.length - 1 && ', '}
                       </span>
                     );
@@ -268,7 +281,7 @@ const CaseDetail = () => {
                       </div>
                       <div className="flex-1 pb-6">
                         <p className="text-sm font-semibold text-foreground mb-1">
-                          {new Date(item.date).toLocaleDateString()}
+                          {new Date(item.event_date).toLocaleDateString()}
                         </p>
                         <p className="text-sm font-medium text-foreground mb-1">{item.title}</p>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
@@ -333,9 +346,10 @@ const CaseDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {caseData.related_entities.map((entityId, index) => {
-                    const entity = resolvedEntities[entityId];
-                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                  {caseData.related_entities.map((e, index) => {
+                    const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
+                    const linkId = e.nes_id || e.id.toString();
                     return (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center">
@@ -349,11 +363,13 @@ const CaseDetail = () => {
                             )}
                           </div>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/entity/${encodeURIComponent(entityId)}`}>
-                            View Profile
-                          </Link>
-                        </Button>
+                        {e.nes_id && (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/entity/${encodeURIComponent(linkId)}`}>
+                              View Profile
+                            </Link>
+                          </Button>
+                        )}
                       </div>
                     );
                   })}

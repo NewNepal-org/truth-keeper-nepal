@@ -60,7 +60,7 @@ export const getDescription = (description: LangText | null | undefined, lang: '
 };
 
 // Get attribute value from entity
-export const getAttribute = (entity: Entity, key: string): any => {
+export const getAttribute = (entity: Entity, key: string): unknown => {
   return entity.attributes?.[key];
 };
 

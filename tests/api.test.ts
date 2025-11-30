@@ -19,7 +19,10 @@ import {
 
 // Mock axios
 vi.mock('axios');
-const mockedAxios = axios as any;
+const mockedAxios = axios as {
+  create: ReturnType<typeof vi.fn>;
+  isAxiosError: ReturnType<typeof vi.fn>;
+};
 
 describe('NES API Client', () => {
   beforeEach(() => {

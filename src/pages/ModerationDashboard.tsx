@@ -13,8 +13,21 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Eye, Edit, Clock, AlertTriangle } from "lucide-react";
 
+interface Submission {
+  id: string;
+  type: string;
+  title: string;
+  entity: string;
+  submittedBy: string;
+  submittedDate: string;
+  status: string;
+  severity?: string;
+  description: string;
+  sources?: string[];
+}
+
 export default function ModerationDashboard() {
-  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   // Mock pending submissions
   const pendingSubmissions = [

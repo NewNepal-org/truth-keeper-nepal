@@ -121,8 +121,8 @@ export async function getCasesByEntity(entityId: string, params?: CaseSearchPara
     
     // Filter cases that include the entity in alleged_entities or related_entities
     const filteredCases = response.data.results.filter(caseItem => 
-      caseItem.alleged_entities.includes(entityId) || 
-      caseItem.related_entities.includes(entityId)
+      caseItem.alleged_entities.some(e => e.nes_id === entityId) || 
+      caseItem.related_entities.some(e => e.nes_id === entityId)
     );
     
     return filteredCases;

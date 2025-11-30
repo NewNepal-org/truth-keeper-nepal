@@ -69,13 +69,15 @@ const Cases = () => {
       );
       setCases(response.results);
       
-      // Resolve entities
-      const allEntityIds = response.results.flatMap(c => [...c.alleged_entities, ...c.locations]);
-      const uniqueEntityIds = [...new Set(allEntityIds)];
-      const entityPromises = uniqueEntityIds.map(async (entityId) => {
+      // Resolve entities from NES if they have nes_id
+      const allEntities = response.results.flatMap(c => [...c.alleged_entities, ...c.locations]);
+      const entitiesWithNesId = allEntities.filter(e => e.nes_id);
+      const uniqueNesIds = [...new Set(entitiesWithNesId.map(e => e.nes_id!))];
+      
+      const entityPromises = uniqueNesIds.map(async (nesId) => {
         try {
-          const entity = await getEntityById(entityId);
-          return { id: entityId, entity };
+          const entity = await getEntityById(nesId);
+          return { id: nesId, entity };
         } catch {
           return null;
         }
@@ -217,20 +219,26 @@ const Cases = () => {
                   key={caseItem.id}
                   id={caseItem.id.toString()}
                   title={caseItem.title}
-                  entity={caseItem.alleged_entities.map(entityId => {
-                    const entity = resolvedEntities[entityId];
-                    return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || entityId;
+                  entity={caseItem.alleged_entities.map(e => {
+                    if (e.nes_id && resolvedEntities[e.nes_id]) {
+                      const entity = resolvedEntities[e.nes_id];
+                      return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id;
+                    }
+                    return e.display_name || e.nes_id || 'Unknown';
                   }).join(', ') || 'Unknown Entity'}
-                  location={caseItem.locations.map(locationId => {
-                    const entity = resolvedEntities[locationId];
-                    return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || locationId;
+                  location={caseItem.locations.map(e => {
+                    if (e.nes_id && resolvedEntities[e.nes_id]) {
+                      const entity = resolvedEntities[e.nes_id];
+                      return entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id;
+                    }
+                    return e.display_name || e.nes_id || 'Unknown';
                   }).join(', ') || 'Unknown Location'}
                   date={new Date(caseItem.created_at).toLocaleDateString()}
                   status="ongoing"
                   tags={caseItem.tags || []}
                   description={caseItem.key_allegations.join('. ')}
-                  entityIds={caseItem.alleged_entities}
-                  locationIds={caseItem.locations}
+                  entityIds={caseItem.alleged_entities.map(e => e.nes_id).filter(Boolean) as string[]}
+                  locationIds={caseItem.locations.map(e => e.nes_id).filter(Boolean) as string[]}
                 />
               ))}
             </div>

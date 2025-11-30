@@ -58,7 +58,7 @@ export interface MergedEntity {
     corruption_risk?: string;
     photo_url?: string;
     cover_photo_url?: string;
-    extra_attributes?: Record<string, any>;
+    extra_attributes?: Record<string, unknown>;
   };
 
   electoral_details?: {
@@ -100,7 +100,7 @@ export interface MergedRelationship {
   type: string;
   start_date?: string;
   end_date?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface MergedAllegation {

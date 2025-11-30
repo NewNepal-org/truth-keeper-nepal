@@ -17,7 +17,7 @@ interface CaseCardProps {
   locationIds?: string[];
 }
 
-export const CaseCard = ({ id, title, entity, location, date, status, tags, description, entityIds, locationIds }: CaseCardProps) => {
+export const CaseCard = ({ id, title, entity, location, date, status, tags = [], description, entityIds, locationIds }: CaseCardProps) => {
   const { t } = useTranslation();
 
   const statusConfig = {

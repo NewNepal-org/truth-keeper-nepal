@@ -11,7 +11,7 @@ interface Version {
   updated_at: string;
   author_id: string;
   change_description?: string;
-  snapshot?: any;
+  snapshot?: Record<string, unknown>;
 }
 
 interface VersionHistoryListProps {

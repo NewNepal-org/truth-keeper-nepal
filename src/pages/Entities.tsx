@@ -43,7 +43,12 @@ const Entities = () => {
   const fetchEntities = async () => {
     setLoading(true);
     try {
-      const params: any = {
+      const params: {
+        limit: number;
+        offset: number;
+        entity_type?: string;
+        sub_type?: string;
+      } = {
         limit: 100,
         offset: 0
       };

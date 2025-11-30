@@ -17,7 +17,10 @@ import { mergeEvidenceAndSources } from '../src/services/nes-adapters';
 import type { Entity } from '../src/types/nes';
 
 vi.mock('axios');
-const mockedAxios = axios as any;
+const mockedAxios = axios as {
+  create: ReturnType<typeof vi.fn>;
+  isAxiosError: ReturnType<typeof vi.fn>;
+};
 
 describe('Integration: Entity List → Entity Detail Flow', () => {
   beforeEach(() => {

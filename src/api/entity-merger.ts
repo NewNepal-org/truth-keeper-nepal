@@ -40,12 +40,12 @@ export function mergeNESEntity(
   // Extract identifiers from attributes (NES stores Nepal-specific IDs in attributes)
   const identifiers: MergedEntity['identifiers'] = {};
   if (nesEntity.attributes) {
-    const attrs = nesEntity.attributes as any;
-    if (attrs.citizenship_no) identifiers.citizenship_no = attrs.citizenship_no;
-    if (attrs.pan_no) identifiers.pan_no = attrs.pan_no;
-    if (attrs.voter_id) identifiers.voter_id = attrs.voter_id;
-    if (attrs.passport_no) identifiers.passport_no = attrs.passport_no;
-    if (attrs.national_id) identifiers.national_id = attrs.national_id;
+    const attrs = nesEntity.attributes as Record<string, unknown>;
+    if (typeof attrs.citizenship_no === 'string') identifiers.citizenship_no = attrs.citizenship_no;
+    if (typeof attrs.pan_no === 'string') identifiers.pan_no = attrs.pan_no;
+    if (typeof attrs.voter_id === 'string') identifiers.voter_id = attrs.voter_id;
+    if (typeof attrs.passport_no === 'string') identifiers.passport_no = attrs.passport_no;
+    if (typeof attrs.national_id === 'string') identifiers.national_id = attrs.national_id;
   }
   
   // Extract external identifiers
@@ -79,9 +79,12 @@ export function mergeNESEntity(
     const addr = personData.address;
     // Address has location_id and description2
     contacts.address = addr.description2?.en?.value || addr.description2?.ne?.value;
-  } else if ((nesEntity as any).address) {
-    const addr = (nesEntity as any).address;
-    contacts.address = addr.description2?.en?.value || addr.description2?.ne?.value;
+  } else if (nesEntity.type === 'organization') {
+    const orgEntity = nesEntity as Organization;
+    if (orgEntity.address) {
+      const addr = orgEntity.address;
+      contacts.address = addr.description2?.en?.value || addr.description2?.ne?.value;
+    }
   }
 
   // Extract descriptions

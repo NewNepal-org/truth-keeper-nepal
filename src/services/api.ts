@@ -67,7 +67,7 @@ export interface EntitySearchParams {
   query?: string;       // Search query
   entity_type?: string; // Entity type: person, organization, location
   sub_type?: string;    // Entity subtype
-  attributes?: Record<string, any>; // Filter by attributes (JSON object)
+  attributes?: Record<string, unknown>; // Filter by attributes (JSON object)
   limit?: number;       // Maximum number of results (default: 100, max: 1000)
   offset?: number;      // Number of results to skip (default: 0)
 }
@@ -131,8 +131,8 @@ function handleApiError(error: unknown, endpoint: string): never {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
     const statusCode = axiosError.response?.status;
-    const responseData = axiosError.response?.data as any;
-    const message = responseData?.detail || axiosError.message;
+    const responseData = axiosError.response?.data as Record<string, unknown> | undefined;
+    const message = (responseData?.detail as string) || axiosError.message;
     
     throw new NESApiError(
       `API request failed: ${message}`,
@@ -179,7 +179,7 @@ function handleApiError(error: unknown, endpoint: string): never {
  */
 export async function getEntities(params?: EntitySearchParams): Promise<EntityListResponse> {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, string | number> = {};
     
     if (params?.query) queryParams.query = params.query;
     if (params?.entity_type) queryParams.entity_type = params.entity_type;
@@ -332,7 +332,6 @@ export async function getRelationships(
  */
 export async function getEntityAllegations(idOrSlug: string): Promise<Allegation[]> {
   try {
-    const { getAllegationsByEntity } = await import('./jds-api');
     // URL-encode the entity ID for JDS API query
     const jdsCases = await getCasesByEntity(idOrSlug);
     
@@ -390,9 +389,9 @@ export async function getEntityCases(idOrSlug: string): Promise<Case[]> {
 /**
  * Check API health
  * 
- * @returns Promise<any>
+ * @returns Promise<{ status: string }>
  */
-export async function healthCheck(): Promise<any> {
+export async function healthCheck(): Promise<{ status: string }> {
   try {
     const response = await api.get('/health');
     return response.data;

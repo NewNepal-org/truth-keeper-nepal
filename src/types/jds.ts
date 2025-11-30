@@ -19,8 +19,14 @@ export type CaseType =
 // Main Types
 // ============================================================================
 
+export interface JawafEntity {
+  id: number;
+  nes_id: string | null; // Entity ID from Nepal Entity Service
+  display_name: string | null; // Display name for the entity
+}
+
 export interface TimelineEntry {
-  date: string; // ISO date format
+  event_date: string; // ISO date format
   title: string;
   description: string;
 }
@@ -48,9 +54,9 @@ export interface Case {
   title: string;
   case_start_date: string | null; // ISO date format
   case_end_date: string | null; // ISO date format
-  alleged_entities: string[]; // Entity IDs (e.g., 'entity:person/rabi-lamichhane')
-  related_entities: string[]; // Entity IDs
-  locations: string[]; // Location entity IDs (e.g., 'entity:location/district/kathmandu')
+  alleged_entities: JawafEntity[]; // Entities alleged to be involved
+  related_entities: JawafEntity[]; // Related entities
+  locations: JawafEntity[]; // Location entities
   tags: string[]; // Tags for categorization (e.g., 'land-encroachment', 'national-interest')
   description: string; // Rich text description
   key_allegations: string[]; // List of key allegation statements
@@ -71,7 +77,7 @@ export interface DocumentSource {
   title: string;
   description: string;
   url?: string | null;
-  related_entity_ids: string[];
+  related_entities: JawafEntity[]; // Related entities
   created_at: string;
   updated_at: string;
 }

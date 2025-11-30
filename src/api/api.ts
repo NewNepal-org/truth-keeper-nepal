@@ -65,7 +65,7 @@ export interface EntitySearchParams {
   query?: string;
   entity_type?: string;
   sub_type?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   limit?: number;
   offset?: number;
 }
