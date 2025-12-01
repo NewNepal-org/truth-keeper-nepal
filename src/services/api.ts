@@ -370,7 +370,7 @@ export async function getEntityCases(idOrSlug: string): Promise<Case[]> {
       description: c.description,
       documents: c.evidence.map(e => e.source_id.toString()),
       timeline: c.timeline.map(t => ({
-        date: t.date,
+        date: t.event_date,
         event: t.title,
         description: t.description
       })),

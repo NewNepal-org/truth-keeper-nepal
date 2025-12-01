@@ -74,17 +74,11 @@ export function mergeNESEntity(
     });
   }
 
-  // Extract address from person or organization
+  // Extract address from person
   if (isPerson && personData?.address) {
     const addr = personData.address;
     // Address has location_id and description2
     contacts.address = addr.description2?.en?.value || addr.description2?.ne?.value;
-  } else if (nesEntity.type === 'organization') {
-    const orgEntity = nesEntity as Organization;
-    if (orgEntity.address) {
-      const addr = orgEntity.address;
-      contacts.address = addr.description2?.en?.value || addr.description2?.ne?.value;
-    }
   }
 
   // Extract descriptions
@@ -190,7 +184,7 @@ export function mergeNESEntity(
     description: c.description || '',
     documents: c.evidence?.map(e => e.source_id.toString()) || [],
     timeline: c.timeline?.map(t => ({
-      date: t.date,
+      date: t.event_date,
       event: t.title || 'Event',
       description: t.description,
     })) || [],

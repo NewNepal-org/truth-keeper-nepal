@@ -11,7 +11,7 @@ export const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xl font-bold text-primary-foreground">PAP</span>
+                <span className="text-xl font-bold text-primary-foreground">जवा</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-foreground">{t("footer.title")}</span>

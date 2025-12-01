@@ -8,23 +8,23 @@
     "searchCases": "Search cases"
   },
   "header": {
-    "title": "Public Accountability",
-    "subtitle": "Platform Nepal",
+    "title": "Jawafdehi",
+    "subtitle": "Nepal",
     "reportCase": "Report Case",
     "viewCases": "View Cases"
   },
   "footer": {
-    "title": "Public Accountability Platform",
+    "title": "Jawafdehi",
     "subtitle": "Nepal",
     "description": "A civic tech initiative to promote transparency and accountability in Nepal.",
     "navigation": "Navigation",
     "partners": "Partners",
-    "copyright": "© {{year}} Public Accountability Platform Nepal. All rights reserved."
+    "copyright": "© {{year}} Jawafdehi Nepal. All rights reserved."
   },
   "home": {
     "hero": {
       "badge": "Transparency • Accountability • Justice",
-      "title": "Public Accountability Platform Nepal",
+      "title": "Jawafdehi Nepal",
       "description": "Documenting and tracking corruption cases to hold public entities accountable. Empowering Nepali citizens with transparency and verified information.",
       "browseCases": "Browse Cases",
       "learnMore": "Learn More"
@@ -51,7 +51,7 @@
     },
     "mission": {
       "title": "Our Mission",
-      "description": "The Public Accountability Platform (PAP) is a civic tech initiative by Let's Build Nepal (LBN) and NewNepal.org dedicated to promoting transparency and accountability in Nepal. We document, verify, and publish corruption cases involving public entities to empower citizens with information and drive systemic change.",
+      "description": "Jawafdehi is a civic tech initiative by Let's Build Nepal (LBN) and NewNepal.org dedicated to promoting transparency and accountability in Nepal. We document, verify, and publish corruption cases involving public entities to empower citizens with information and drive systemic change.",
       "aboutPlatform": "About the Platform"
     },
     "cta": {
@@ -127,11 +127,11 @@
     "noEntitiesFound": "No entities found. Try adjusting your search criteria."
   },
   "about": {
-    "title": "About the Public Accountability Platform",
+    "title": "About Jawafdehi",
     "subtitle": "A civic tech initiative committed to transparency, accountability, and justice in Nepal.",
     "mission": {
       "title": "Our Mission",
-      "description1": "The Public Accountability Platform (PAP) is dedicated to promoting transparency and accountability in Nepal by documenting, verifying, and publishing corruption cases involving public entities. We empower Nepali citizens with verified information to drive systemic change and hold public officials accountable for their actions.",
+      "description1": "Jawafdehi is dedicated to promoting transparency and accountability in Nepal by documenting, verifying, and publishing corruption cases involving public entities. We empower Nepali citizens with verified information to drive systemic change and hold public officials accountable for their actions.",
       "description2": "Through rigorous investigation, documentation, and public disclosure, we aim to create a more transparent governance system where corruption is exposed, justice is served, and public trust is restored."
     },
     "values": {
@@ -269,7 +269,7 @@
       },
       "funding": {
         "question": "How is this platform funded?",
-        "answer": "The Public Accountability Platform is funded through partnerships with civic organizations and potential grants from transparency-focused foundations. We maintain editorial independence and do not accept funding from government entities or organizations that could compromise our integrity."
+        "answer": "Jawafdehi is funded through partnerships with civic organizations and potential grants from transparency-focused foundations. We maintain editorial independence and do not accept funding from government entities or organizations that could compromise our integrity."
       },
       "useInfo": {
         "question": "Can I use information from this platform?",
@@ -327,7 +327,7 @@
   },
   "feedback": {
     "title": "Platform Feedback",
-    "description": "Help us improve the Public Accountability Platform. Your feedback is valuable to us.",
+    "description": "Help us improve Jawafdehi. Your feedback is valuable to us.",
     "feedbackType": "Feedback Type",
     "selectFeedbackType": "Select feedback type",
     "bug": "Bug Report",
