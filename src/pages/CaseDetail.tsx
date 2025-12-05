@@ -216,28 +216,17 @@ const CaseDetail = () => {
               </div>
               <div className="flex items-center text-muted-foreground">
                 <Calendar className="mr-2 h-5 w-5" />
-                <span className="text-sm">{t("caseDetail.filed")}: {new Date(caseData.created_at).toLocaleDateString()}</span>
+                <span className="text-sm">
+                  {t("caseDetail.period")}:{" "}
+                  {caseData.case_start_date && new Date(caseData.case_start_date).toLocaleDateString()}
+                  {caseData.case_end_date && ` - ${new Date(caseData.case_end_date).toLocaleDateString()}`}
+                  {!caseData.case_start_date && !caseData.case_end_date && 'N/A'}
+                </span>
               </div>
             </div>
           </div>
 
           <Separator className="mb-8" />
-
-          {/* Overview */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                {t("caseDetail.overview")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_a]:underline"
-                dangerouslySetInnerHTML={{ __html: caseData.description }}
-              />
-            </CardContent>
-          </Card>
 
           {/* Key Allegations */}
           <Card className="mb-8">
@@ -261,6 +250,36 @@ const CaseDetail = () => {
             </CardContent>
           </Card>
 
+          {/* Related Entities */}
+          {caseData.related_entities.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>{t("caseDetail.partiesInvolved")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-muted-foreground">
+                  {caseData.related_entities.map((e, index) => {
+                    const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
+                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
+                    const linkId = e.nes_id || e.id.toString();
+                    return (
+                      <span key={index}>
+                        {e.nes_id ? (
+                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
+                            {displayName}
+                          </Link>
+                        ) : (
+                          <span>{displayName}</span>
+                        )}
+                        {index < caseData.related_entities.length - 1 && ', '}
+                      </span>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Timeline */}
           {caseData.timeline.length > 0 && (
             <Card className="mb-8">
@@ -281,7 +300,7 @@ const CaseDetail = () => {
                       </div>
                       <div className="flex-1 pb-6">
                         <p className="text-sm font-semibold text-foreground mb-1">
-                          {new Date(item.event_date).toLocaleDateString()}
+                          {new Date((item as any).date).toLocaleDateString()}
                         </p>
                         <p className="text-sm font-medium text-foreground mb-1">{item.title}</p>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
@@ -292,6 +311,22 @@ const CaseDetail = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Overview */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                {t("caseDetail.overview")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div 
+                className="text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: caseData.description }}
+              />
+            </CardContent>
+          </Card>
 
           {/* Evidence */}
           {caseData.evidence.length > 0 && (
@@ -314,11 +349,11 @@ const CaseDetail = () => {
                             {source?.title || `Source ${evidence.source_id}`}
                           </p>
                           <p className="text-sm text-muted-foreground mb-2">
-                            {evidence.description}
+                            {source.description}
                           </p>
                           {source?.description && (
                             <p className="text-sm text-muted-foreground mb-2">
-                              {source.description}
+                              {evidence.description}
                             </p>
                           )}
                           {source?.url && (
@@ -330,46 +365,6 @@ const CaseDetail = () => {
                             </Button>
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Related Entities */}
-          {caseData.related_entities.length > 0 && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>{t("caseDetail.partiesInvolved")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {caseData.related_entities.map((e, index) => {
-                    const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
-                    const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
-                    const linkId = e.nes_id || e.id.toString();
-                    return (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center">
-                          <User className="mr-3 h-5 w-5 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{displayName}</p>
-                            {entity?.short_description?.en?.value && (
-                              <p className="text-sm text-muted-foreground">
-                                {entity.short_description.en.value}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {e.nes_id && (
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/entity/${encodeURIComponent(linkId)}`}>
-                              View Profile
-                            </Link>
-                          </Button>
-                        )}
                       </div>
                     );
                   })}

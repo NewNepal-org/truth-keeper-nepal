@@ -4,7 +4,7 @@
  * Type definitions for the accountability and cases API.
  * 
  * Reference: Jawafdehi_Public_Accountability_API.yaml
- * Base URL: https://api.jawafdehi.newnepal.org/api
+ * Base URL: https://portal.jawafdehi.org/api
  */
 
 // ============================================================================

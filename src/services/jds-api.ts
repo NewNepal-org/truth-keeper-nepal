@@ -6,7 +6,7 @@
  * misconduct, and broken promises by public entities in Nepal.
  * 
  * Reference: Jawafdehi_Public_Accountability_API.yaml
- * Base URL: https://api.jawafdehi.newnepal.org/api
+ * Base URL: https://portal.jawafdehi.org/api
  */
 
 import axios, { AxiosError, AxiosInstance } from 'axios';
@@ -24,7 +24,7 @@ import type {
 // Configuration
 // ============================================================================
 
-const JDS_API_BASE_URL = import.meta.env.VITE_JDS_API_BASE_URL || 'https://api.jawafdehi.newnepal.org/api';
+const JDS_API_BASE_URL = import.meta.env.VITE_JDS_API_BASE_URL || 'https://portal.jawafdehi.org/api';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: JDS_API_BASE_URL,
