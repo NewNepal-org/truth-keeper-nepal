@@ -132,6 +132,35 @@ export async function getCasesByEntity(entityId: string, params?: CaseSearchPara
   }
 }
 
+/**
+ * Get a Jawaf entity by its database ID.
+ * Searches through cases to find the entity with the matching ID.
+ */
+export async function getJawafEntityById(entityId: number): Promise<import('@/types/jds').JawafEntity | null> {
+  try {
+    const response = await apiClient.get<PaginatedCaseList>('/cases/');
+    
+    // Search through all cases to find the entity
+    for (const caseItem of response.data.results) {
+      // Check alleged entities
+      const allegedEntity = caseItem.alleged_entities.find(e => e.id === entityId);
+      if (allegedEntity) return allegedEntity;
+      
+      // Check related entities
+      const relatedEntity = caseItem.related_entities.find(e => e.id === entityId);
+      if (relatedEntity) return relatedEntity;
+      
+      // Check location entities
+      const locationEntity = caseItem.locations.find(e => e.id === entityId);
+      if (locationEntity) return locationEntity;
+    }
+    
+    return null;
+  } catch (error) {
+    handleApiError(error, '/cases/');
+  }
+}
+
 // ============================================================================
 // Document Source API Functions
 // ============================================================================

@@ -6,15 +6,13 @@ import { Footer } from "@/components/Footer";
 import EntityCard from "@/components/EntityCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Filter } from "lucide-react";
-import { getEntities, Entity, getEntityIdsWithCases } from "@/services/api";
-import { getPrimaryName } from "@/utils/nes-helpers";
+import { getEntityById, Entity } from "@/services/api";
 import { toast } from "sonner";
+import axios from "axios";
+import type { JawafEntity } from "@/types/jds";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -33,147 +31,138 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// Combined entity type with NES data
+interface EnrichedEntity {
+  jawafEntity: JawafEntity;
+  nesEntity?: Entity;
+}
+
 const Entities = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [entities, setEntities] = useState<Entity[]>([]);
+  const [entities, setEntities] = useState<EnrichedEntity[]>([]);
+  const [allEntities, setAllEntities] = useState<EnrichedEntity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [entityTypeFilter, setEntityTypeFilter] = useState(searchParams.get("entityType") || "person");
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "name");
-  const [entityIdsWithCases, setEntityIdsWithCases] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
 
-  // Fetch entity IDs with cases on mount
-  useEffect(() => {
-    const fetchEntityIds = async () => {
-      try {
-        const ids = await getEntityIdsWithCases();
-        setEntityIdsWithCases(ids);
-      } catch (error) {
-        console.error("Failed to fetch entity IDs with cases:", error);
-        toast.error("Failed to load entities with cases");
-      }
-    };
-    fetchEntityIds();
-  }, []);
-
-  // Update URL params when filters change
+  // Update URL params when search changes
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedSearchQuery) params.set("search", debouncedSearchQuery);
-    if (entityTypeFilter) params.set("entityType", entityTypeFilter);
-    if (sortBy !== "name") params.set("sort", sortBy);
     setSearchParams(params, { replace: true });
-  }, [debouncedSearchQuery, entityTypeFilter, sortBy, setSearchParams]);
+  }, [debouncedSearchQuery, setSearchParams]);
 
-  // Fetch entities when filters or entity IDs change
+  // Fetch entities from JDS API with pagination
   useEffect(() => {
-    const fetchEntities = async () => {
-      setLoading(true);
+    const fetchEntities = async (pageNum: number) => {
+      if (pageNum === 1) {
+        setLoading(true);
+        setAllEntities([]);
+      } else {
+        setLoadingMore(true);
+      }
+
       try {
-        const params: {
-          limit: number;
-          offset: number;
-          entity_type?: string;
-          sub_type?: string;
-          entity_ids?: string[];
-          query?: string;
-        } = {
-          limit: 100,
-          offset: 0
-        };
+        const JDS_API_BASE_URL = import.meta.env.VITE_JDS_API_BASE_URL || 'https://portal.jawafdehi.org/api';
+        
+        // Fetch JawafEntities from JDS API with pagination
+        const response = await axios.get<{ count: number; next: string | null; results: JawafEntity[] }>(
+          `${JDS_API_BASE_URL}/entities/`,
+          { params: { page: pageNum } }
+        );
 
-        // Set entity_type and sub_type based on filter
-        if (entityTypeFilter === "person") {
-          params.entity_type = "person";
-        } else if (entityTypeFilter === "political_party") {
-          params.entity_type = "organization";
-          params.sub_type = "political_party";
-        }
+        const jawafEntities = response.data.results || [];
+        const count = response.data.count || 0;
+        const hasNext = response.data.next !== null;
 
-        // Only use entity IDs for filtering if they're loaded
-        if (entityIdsWithCases.length > 0) {
-          params.entity_ids = entityIdsWithCases;
-        }
+        console.log(`Fetched ${jawafEntities.length} entities from JDS (page ${pageNum})`);
 
-        // Add search query to params if provided
-        if (debouncedSearchQuery) {
-          params.query = debouncedSearchQuery;
-        }
+        // TODO: Implement batch NES API endpoint to fetch multiple entities at once
+        // For now, fetch NES data one at a time for entities with nes_id
+        const enrichedEntities: EnrichedEntity[] = await Promise.all(
+          jawafEntities.map(async (jawafEntity) => {
+            if (jawafEntity.nes_id) {
+              try {
+                const nesEntity = await getEntityById(jawafEntity.nes_id);
+                return { jawafEntity, nesEntity };
+              } catch (error) {
+                console.warn(`Failed to fetch NES data for ${jawafEntity.nes_id}:`, error);
+                return { jawafEntity };
+              }
+            }
+            return { jawafEntity };
+          })
+        );
 
-        const data = await getEntities(params);
-
-        // Extract entities array from response
-        const entitiesArray = Array.isArray(data) ? data : (data.entities || []);
-
-
-        // Filter entities by search query if provided (client-side filtering for names)
-        let filteredEntities = entitiesArray;
-
-        if (debouncedSearchQuery) {
-          const queryLower = debouncedSearchQuery.toLowerCase();
-          filteredEntities = entitiesArray.filter(entity => {
-            const nameEn = getPrimaryName(entity.names, 'en').toLowerCase();
-            const nameNe = getPrimaryName(entity.names, 'ne').toLowerCase();
-            return nameEn.includes(queryLower) || nameNe.includes(queryLower);
-          });
-        }
-
-        // Filter to only include entities that have cases (if entity IDs are loaded)
-        // If entity IDs haven't loaded yet, show all entities temporarily
-        if (entityIdsWithCases.length > 0) {
-          const beforeFilter = filteredEntities.length;
-          filteredEntities = filteredEntities.filter(entity => {
-            return entityIdsWithCases.includes(entity.id);
-          });
-        } else {
-          // If entity IDs haven't loaded yet, show all entities temporarily
-          // They will be filtered once entity IDs load
-        }
-
-        setEntities(filteredEntities);
+        // Append to existing entities
+        setAllEntities(prev => pageNum === 1 ? enrichedEntities : [...prev, ...enrichedEntities]);
+        setTotalCount(count);
+        setHasMore(hasNext);
       } catch (error) {
         console.error("Failed to fetch entities:", error);
-        toast.error(t("entities.noEntitiesFound"));
-        setEntities([]);
+        toast.error(t("entities.fetchError") || "Failed to load entities");
+        if (pageNum === 1) {
+          setAllEntities([]);
+        }
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     };
 
-    fetchEntities();
-  }, [debouncedSearchQuery, entityTypeFilter, entityIdsWithCases, t]);
+    fetchEntities(page);
+  }, [page, t]);
+
+  // Apply search filter when search query or entities change
+  useEffect(() => {
+    // Client-side search filtering
+    let filtered = allEntities;
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
+      filtered = allEntities.filter(({ jawafEntity, nesEntity }) => {
+        // Search in display_name
+        if (jawafEntity.display_name?.toLowerCase().includes(query)) return true;
+        // Search in nes_id
+        if (jawafEntity.nes_id?.toLowerCase().includes(query)) return true;
+        // Search in NES entity names if available
+        if (nesEntity?.names) {
+          const nameEn = nesEntity.names.find(n => n.en)?.en?.full?.toLowerCase() || '';
+          const nameNe = nesEntity.names.find(n => n.ne)?.ne?.full?.toLowerCase() || '';
+          if (nameEn.includes(query) || nameNe.includes(query)) return true;
+        }
+        return false;
+      });
+    }
+
+    // Sort alphabetically by display name or nes_id
+    const sorted = [...filtered].sort((a, b) => {
+      const nameA = a.jawafEntity.display_name || a.jawafEntity.nes_id || '';
+      const nameB = b.jawafEntity.display_name || b.jawafEntity.nes_id || '';
+      return nameA.localeCompare(nameB);
+    });
+
+    setEntities(sorted);
+  }, [allEntities, debouncedSearchQuery]);
 
 
   const handleReset = () => {
     setSearchQuery("");
-    setEntityTypeFilter("person");
-    setSortBy("name");
-    const params = new URLSearchParams();
-    params.set("entityType", "person");
-    setSearchParams(params);
+    setSearchParams(new URLSearchParams());
   };
 
-  // Sort entities
-  const sortedEntities = [...entities].sort((a, b) => {
-    if (sortBy === "name") {
-      const nameA = getPrimaryName(a.names, 'en');
-      const nameB = getPrimaryName(b.names, 'en');
-      return nameA.localeCompare(nameB);
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      setPage(prev => prev + 1);
     }
-    if (sortBy === "updated") {
-      const dateA = a.version_summary?.created_at || "";
-      const dateB = b.version_summary?.created_at || "";
-      return dateB.localeCompare(dateA); // Most recent first
-    }
-    // For "allegations" sort, we'd need allegation counts from backend
-    // For now, maintain original order
-    return 0;
-  });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -203,43 +192,15 @@ const Entities = () => {
                   />
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-3 block">{t("entities.entityType")}</label>
-                    <RadioGroup value={entityTypeFilter} onValueChange={setEntityTypeFilter} className="flex gap-4">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="person" id="person" />
-                        <Label htmlFor="person" className="cursor-pointer">{t("entities.persons")}</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="political_party" id="political_party" />
-                        <Label htmlFor="political_party" className="cursor-pointer">{t("entities.politicalParties")}</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-2 block">{t("entities.sortBy")}</label>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="name">{t("entities.nameAZ")}</SelectItem>
-                        <SelectItem value="allegations">{t("entities.mostAllegations")}</SelectItem>
-                        <SelectItem value="updated">{t("entities.latestUpdates")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-end">
+                {/* Reset Button */}
+                {searchQuery && (
+                  <div className="flex justify-end">
                     <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto">
                       <Filter className="w-4 h-4 mr-2" />
                       {t("entities.reset")}
                     </Button>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -247,7 +208,11 @@ const Entities = () => {
           {/* Results Count */}
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              {loading ? t("entities.loading") : t("entities.entitiesFound", { count: sortedEntities.length })}
+              {loading ? t("entities.loading") : (
+                debouncedSearchQuery 
+                  ? t("entities.entitiesFound", { count: entities.length })
+                  : t("entities.showing", { count: allEntities.length, total: totalCount })
+              )}
             </p>
           </div>
 
@@ -270,7 +235,7 @@ const Entities = () => {
                 </Card>
               ))}
             </div>
-          ) : sortedEntities.length === 0 ? (
+          ) : entities.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <p className="text-muted-foreground">
@@ -279,16 +244,31 @@ const Entities = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedEntities.map((entity) => (
-                <EntityCard
-                  key={entity.id}
-                  entity={entity}
-                  allegationCount={Math.floor(Math.random() * 10)}
-                  caseCount={Math.floor(Math.random() * 5)}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {entities.map(({ jawafEntity, nesEntity }) => (
+                  <EntityCard
+                    key={jawafEntity.id}
+                    entity={nesEntity}
+                    jawafEntity={jawafEntity}
+                  />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {!debouncedSearchQuery && hasMore && (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    variant="outline"
+                    size="lg"
+                  >
+                    {loadingMore ? t("entities.loadingMore") : t("entities.loadMore")}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

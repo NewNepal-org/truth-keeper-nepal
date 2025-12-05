@@ -176,16 +176,11 @@ const CaseDetail = () => {
                   {caseData.alleged_entities.map((e, index) => {
                     const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
                     const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
-                    const linkId = e.nes_id || e.id.toString();
                     return (
                       <span key={e.id}>
-                        {e.nes_id ? (
-                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
-                            {displayName}
-                          </Link>
-                        ) : (
-                          <span>{displayName}</span>
-                        )}
+                        <Link to={`/entity/${e.id}`} className="text-primary hover:underline">
+                          {displayName}
+                        </Link>
                         {index < caseData.alleged_entities.length - 1 && ', '}
                       </span>
                     );
@@ -198,16 +193,11 @@ const CaseDetail = () => {
                   {caseData.locations.length > 0 ? caseData.locations.map((e, index) => {
                     const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
                     const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
-                    const linkId = e.nes_id || e.id.toString();
                     return (
                       <span key={e.id}>
-                        {e.nes_id ? (
-                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
-                            {displayName}
-                          </Link>
-                        ) : (
-                          <span>{displayName}</span>
-                        )}
+                        <Link to={`/entity/${e.id}`} className="text-primary hover:underline">
+                          {displayName}
+                        </Link>
                         {index < caseData.locations.length - 1 && ', '}
                       </span>
                     );
@@ -261,16 +251,11 @@ const CaseDetail = () => {
                   {caseData.related_entities.map((e, index) => {
                     const entity = e.nes_id ? resolvedEntities[e.nes_id] : null;
                     const displayName = entity?.names?.[0]?.en?.full || entity?.names?.[0]?.ne?.full || e.display_name || e.nes_id || 'Unknown';
-                    const linkId = e.nes_id || e.id.toString();
                     return (
                       <span key={index}>
-                        {e.nes_id ? (
-                          <Link to={`/entity/${encodeURIComponent(linkId)}`} className="text-primary hover:underline">
-                            {displayName}
-                          </Link>
-                        ) : (
-                          <span>{displayName}</span>
-                        )}
+                        <Link to={`/entity/${e.id}`} className="text-primary hover:underline">
+                          {displayName}
+                        </Link>
                         {index < caseData.related_entities.length - 1 && ', '}
                       </span>
                     );

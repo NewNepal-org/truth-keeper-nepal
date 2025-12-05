@@ -13,8 +13,8 @@ interface CaseCardProps {
   status: "ongoing" | "resolved" | "under-investigation";
   tags?: string[];
   description: string;
-  entityIds?: string[];
-  locationIds?: string[];
+  entityIds?: number[]; // Jawaf entity IDs
+  locationIds?: number[]; // Jawaf entity IDs
 }
 
 export const CaseCard = ({ id, title, entity, location, date, status, tags = [], description, entityIds, locationIds }: CaseCardProps) => {
@@ -58,7 +58,7 @@ export const CaseCard = ({ id, title, entity, location, date, status, tags = [],
               <User className="mr-2 h-4 w-4 flex-shrink-0" />
               {entityIds && entityIds.length > 0 ? (
                 <Link
-                  to={`/entity/${encodeURIComponent(entityIds[0])}`}
+                  to={`/entity/${entityIds[0]}`}
                   className="line-clamp-1 hover:text-primary hover:underline transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -72,7 +72,7 @@ export const CaseCard = ({ id, title, entity, location, date, status, tags = [],
               <MapPin className="mr-2 h-4 w-4" />
               {locationIds && locationIds.length > 0 ? (
                 <Link
-                  to={`/entity/${encodeURIComponent(locationIds[0])}`}
+                  to={`/entity/${locationIds[0]}`}
                   className="hover:text-primary hover:underline transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >

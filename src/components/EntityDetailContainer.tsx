@@ -5,45 +5,59 @@
  * Does NOT change visual styles - only wires data
  */
 
+import { useTranslation } from 'react-i18next';
 import { useEntityDetail } from '@/hooks/useEntityDetail';
-import EntityProfileHeader from '@/components/EntityProfileHeader';
-import RelationshipList from '@/components/RelationshipList';
 import { EntityDetailSections } from '@/components/EntityDetailSections';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, FileText, History } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AlertCircle, FileText, Building2, User, Mail, Phone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { getPrimaryName, getAttribute, getEmail, getPhone, getWebsite, getDescription, formatSubType } from '@/utils/nes-helpers';
 
 interface EntityDetailContainerProps {
   entityId?: string;
   entityType?: string;
   entitySlug?: string;
+  jawafEntityId?: number;
+  jawafEntityName?: string | null;
+  hasNesData?: boolean;
+  allegedCaseIds?: number[];
+  relatedCaseIds?: number[];
 }
 
 export function EntityDetailContainer({
   entityId,
   entityType,
   entitySlug,
+  jawafEntityId,
+  jawafEntityName,
+  hasNesData = true,
+  allegedCaseIds = [],
+  relatedCaseIds = [],
 }: EntityDetailContainerProps) {
+  const { t } = useTranslation();
   const {
     entity,
-    mergedEntity,
     allegations,
-    cases,
-    relationships,
-    versions,
-    sources,
+    allegedCases,
+    relatedCases,
     loading,
     error,
   } = useEntityDetail({
     entityId,
     entityType,
     entitySlug,
+    allegedCaseIds,
+    relatedCaseIds,
   });
+
+  // Combine alleged and related cases
+  const allCases = [...allegedCases, ...relatedCases];
 
   if (loading) {
     return (
@@ -65,13 +79,13 @@ export function EntityDetailContainer({
     );
   }
 
-  if (!entity) {
+  if (!entity && hasNesData) {
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <p className="text-muted-foreground">Entity not found.</p>
+          <p className="text-muted-foreground">{t("entityDetail.entityNotFound")}</p>
           <Button asChild className="mt-4">
-            <Link to="/entities">Back to Entities</Link>
+            <Link to="/entities">{t("entityDetail.backToEntities")}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -79,227 +93,229 @@ export function EntityDetailContainer({
   }
 
   const statistics = {
-    allegations: allegations.length,
-    cases: cases.length,
-    relationships: relationships.length,
-    updates: versions.length,
+    cases: allCases.length,
   };
+
+  // Extract entity data for display
+  const primaryName = entity ? (getPrimaryName(entity.names, 'en') || 'Unknown') : (jawafEntityName || 'Unknown Entity');
+  const primaryNameNe = entity ? getPrimaryName(entity.names, 'ne') : null;
+  const position = entity ? (getAttribute(entity, 'position') || getAttribute(entity, 'role')) : null;
+  const organization = entity ? getAttribute(entity, 'organization') : null;
+  const isOrganization = entity ? entity.type === 'organization' : false;
+  const email = entity ? getEmail(entity.contacts) : null;
+  const phone = entity ? getPhone(entity.contacts) : null;
+  const website = entity ? getWebsite(entity.contacts) : null;
+  const description = entity ? getDescription(entity.description, 'en') : null;
+  const photoUrl = entity?.pictures?.find(p => p.type === 'thumb' || p.type === 'full')?.url;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Entity Header */}
-      <EntityProfileHeader
-        entity={entity}
-        allegationCount={statistics.allegations}
-        caseCount={statistics.cases}
-      />
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Photo/Avatar */}
+            <Avatar className="w-32 h-32 rounded-lg flex-shrink-0">
+              <AvatarImage src={photoUrl} alt={primaryName} className="object-cover" />
+              <AvatarFallback className="rounded-lg bg-muted">
+                {isOrganization ? (
+                  <Building2 className="w-16 h-16 text-muted-foreground" />
+                ) : (
+                  <User className="w-16 h-16 text-muted-foreground" />
+                )}
+              </AvatarFallback>
+            </Avatar>
 
-      {/* Key Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{statistics.allegations}</div>
-            <p className="text-sm text-muted-foreground">Allegations</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{statistics.cases}</div>
-            <p className="text-sm text-muted-foreground">Active Cases</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{statistics.relationships}</div>
-            <p className="text-sm text-muted-foreground">Relationships</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{sources.length}</div>
-            <p className="text-sm text-muted-foreground">Sources</p>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Basic Info */}
+            <div className="flex-1">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold mb-2">
+                  {primaryName}{' '}
+                  {jawafEntityId && (
+                    <span className="text-muted-foreground font-mono text-xl">#{jawafEntityId}</span>
+                  )}
+                </h1>
+                {primaryNameNe && (
+                  <p className="text-xl text-muted-foreground mb-2">{primaryNameNe}</p>
+                )}
+                {position && (
+                  <p className="text-lg text-muted-foreground">{String(position)}</p>
+                )}
+                {organization && (
+                  <p className="text-muted-foreground">{String(organization)}</p>
+                )}
+                
+                {entity && (
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    <Badge variant="outline">{entity.type}</Badge>
+                    {entity.sub_type && <Badge variant="outline">{formatSubType(entity.sub_type)}</Badge>}
+                  </div>
+                )}
+              </div>
+
+              {/* Contact Information */}
+              {entity && entity.contacts && entity.contacts.length > 0 && (
+                <div className="space-y-2 text-sm">
+                  {email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <a href={`mailto:${email}`} className="text-primary hover:underline">
+                        {email}
+                      </a>
+                    </div>
+                  )}
+                  {phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <span>{phone}</span>
+                    </div>
+                  )}
+                  {website && (
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-muted-foreground" />
+                      <a 
+                        href={website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="flex md:flex-col gap-4 md:min-w-[200px]">
+              <Card className="flex-1 bg-muted/50">
+                <CardContent className="p-4 text-center">
+                  <div className="text-3xl font-bold text-primary">{allegedCases.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Allegations</div>
+                </CardContent>
+              </Card>
+              <Card className="flex-1 bg-muted/50">
+                <CardContent className="p-4 text-center">
+                  <div className="text-3xl font-bold text-primary">{allCases.length}</div>
+                  <div className="text-sm text-muted-foreground">Active Cases</div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Description */}
+          {description && (
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="font-semibold mb-2">About</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {description}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Tabbed Content */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="allegations">Allegations</TabsTrigger>
+      <Tabs defaultValue="cases" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="cases">Cases</TabsTrigger>
-          <TabsTrigger value="relationships">Relationships</TabsTrigger>
+          <TabsTrigger value="overview">Entity Details</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* No NES Data Alert */}
+          {!hasNesData && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                This entity does not have detailed profile information available yet. 
+                Only basic information from case records is shown.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* All Detail Sections */}
-          {mergedEntity && <EntityDetailSections entity={mergedEntity} />}
+          {entity && <EntityDetailSections entity={entity} />}
 
-          {/* Recent Allegations Preview */}
-          {allegations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Allegations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {allegations.slice(0, 3).map((allegation) => (
-                    <div key={allegation.id} className="border-b border-border pb-4 last:border-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium">{allegation.title}</h4>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(allegation.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {allegation.summary}
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="outline">{allegation.status}</Badge>
-                        <Badge variant="secondary">{allegation.severity}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Sources & Evidence */}
-          {sources.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Sources & Evidence
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {sources.map((source) => (
-                    <div key={source.id} className="border-l-2 border-primary pl-4">
-                      <div className="font-medium">{source.title}</div>
-                      {source.description && (
-                        <p className="text-sm text-muted-foreground">{source.description}</p>
-                      )}
-                      <span className="text-xs text-muted-foreground">{source.type}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Version History Preview */}
-          {versions.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Recent Updates
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {versions.slice(0, 3).map((version) => (
-                    <div key={version.version_number} className="text-sm">
-                      <span className="font-medium">Version {version.version_number}</span>
-                      {' • '}
-                      <span className="text-muted-foreground">
-                        {new Date(version.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="allegations">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Allegations ({allegations.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {allegations.length > 0 ? (
-                <div className="space-y-4">
-                  {allegations.map((allegation) => (
-                    <div key={allegation.id} className="border-b border-border pb-4 last:border-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium">{allegation.title}</h4>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(allegation.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {allegation.summary}
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="outline">{allegation.status}</Badge>
-                        <Badge variant="secondary">{allegation.severity}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No allegations found.</p>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="cases">
-          <Card>
+          {/* Alleged Cases */}
+          <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Active Cases ({cases.length})</CardTitle>
+              <CardTitle>{t("entityDetail.allegedCases")} ({allegedCases.length})</CardTitle>
+              <p className="text-sm text-muted-foreground">Cases where this entity is alleged to be involved</p>
             </CardHeader>
             <CardContent>
-              {cases.length > 0 ? (
+              {allegedCases.length > 0 ? (
                 <div className="space-y-4">
-                  {cases.map((caseItem) => (
+                  {allegedCases.map((caseItem: any) => (
                     <div key={caseItem.id} className="border-b border-border pb-4 last:border-0">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium">{caseItem.name}</h4>
-                        <Badge variant="outline">{caseItem.status}</Badge>
+                        <Link to={`/case/${caseItem.id}`} className="font-medium hover:text-primary hover:underline">
+                          {caseItem.title}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(caseItem.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {caseItem.description}
+                        {caseItem.key_allegations?.join('. ') || caseItem.description}
                       </p>
                       <div className="flex gap-2 mt-2">
-                        {caseItem.documents && caseItem.documents.length > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            {caseItem.documents.length} document(s)
-                          </span>
-                        )}
+                        <Badge variant="outline">{caseItem.case_type}</Badge>
+                        {caseItem.tags?.slice(0, 2).map((tag: string) => (
+                          <Badge key={tag} variant="secondary">{tag}</Badge>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No active cases found.</p>
+                <p className="text-muted-foreground">{t("entityDetail.noAllegedCases")}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Related Cases */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("entityDetail.relatedCases")} ({relatedCases.length})</CardTitle>
+              <p className="text-sm text-muted-foreground">Cases where this entity is mentioned or related</p>
+            </CardHeader>
+            <CardContent>
+              {relatedCases.length > 0 ? (
+                <div className="space-y-4">
+                  {relatedCases.map((caseItem: any) => (
+                    <div key={caseItem.id} className="border-b border-border pb-4 last:border-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <Link to={`/case/${caseItem.id}`} className="font-medium hover:text-primary hover:underline">
+                          {caseItem.title}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(caseItem.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {caseItem.key_allegations?.join('. ') || caseItem.description}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <Badge variant="outline">{caseItem.case_type}</Badge>
+                        {caseItem.tags?.slice(0, 2).map((tag: string) => (
+                          <Badge key={tag} variant="secondary">{tag}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">{t("entityDetail.noRelatedCases")}</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="relationships">
-          <Card>
-            <CardHeader>
-              <CardTitle>Relationships ({relationships.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {relationships.length > 0 ? (
-                <RelationshipList
-                  relationships={relationships}
-                  entityId={entity.slug || entityId || ''}
-                />
-              ) : (
-                <p className="text-muted-foreground">No relationships found.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

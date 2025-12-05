@@ -237,8 +237,8 @@ const Cases = () => {
                   status="ongoing"
                   tags={caseItem.tags || []}
                   description={caseItem.key_allegations.join('. ')}
-                  entityIds={caseItem.alleged_entities.map(e => e.nes_id).filter(Boolean) as string[]}
-                  locationIds={caseItem.locations.map(e => e.nes_id).filter(Boolean) as string[]}
+                  entityIds={caseItem.alleged_entities.map(e => e.id)}
+                  locationIds={caseItem.locations.map(e => e.id)}
                 />
               ))}
             </div>

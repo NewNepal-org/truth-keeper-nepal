@@ -3,7 +3,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/StatCard";
 import { CaseCard } from "@/components/CaseCard";
-import { FileText, Users, Eye, TrendingUp, Shield, Search } from "lucide-react";
+import { FileText, Users, Eye, CheckCircle2, Shield, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -55,8 +55,8 @@ const Index = () => {
         status: "ongoing" as const, // All published cases shown as ongoing
         description: caseItem.description.replace(/<[^>]*>/g, '').substring(0, 200), // Strip HTML and truncate
         tags: caseItem.tags,
-        entityIds: caseItem.alleged_entities.map(e => e.nes_id).filter((id): id is string => id !== null),
-        locationIds: caseItem.locations.map(l => l.nes_id).filter((id): id is string => id !== null),
+        entityIds: caseItem.alleged_entities.map(e => e.id),
+        locationIds: caseItem.locations.map(l => l.id),
       };
     });
   }, [casesData]);
@@ -107,12 +107,6 @@ const Index = () => {
                 description={t("home.stats.totalCasesDesc")}
               />
               <StatCard
-                title={t("home.stats.entitiesTracked")}
-                value={getStatValue(stats?.entities_tracked)}
-                icon={Users}
-                description={t("home.stats.entitiesTrackedDesc")}
-              />
-              <StatCard
                 title={t("home.stats.underInvestigation")}
                 value={getStatValue(stats?.cases_under_investigation)}
                 icon={Eye}
@@ -121,8 +115,14 @@ const Index = () => {
               <StatCard
                 title={t("home.stats.resolved")}
                 value={getStatValue(stats?.cases_closed)}
-                icon={TrendingUp}
+                icon={CheckCircle2}
                 description={t("home.stats.resolvedDesc")}
+              />
+              <StatCard
+                title={t("home.stats.entitiesTracked")}
+                value={getStatValue(stats?.entities_tracked)}
+                icon={Users}
+                description={t("home.stats.entitiesTrackedDesc")}
               />
             </div>
           </div>

@@ -127,8 +127,12 @@
     "latestUpdates": "Latest Updates",
     "reset": "Reset",
     "loading": "Loading...",
+    "loadingMore": "Loading...",
+    "loadMore": "Load More",
+    "showing": "Showing {{count}} of {{total}} entities",
     "entitiesFound": "{{count}} entities found",
-    "noEntitiesFound": "No entities found. Try adjusting your search criteria."
+    "noEntitiesFound": "No entities found. Try adjusting your search criteria.",
+    "fetchError": "Failed to load entities"
   },
   "about": {
     "title": "About Jawafdehi",
@@ -380,6 +384,31 @@
       "high": "High",
       "critical": "Critical"
     }
+  },
+  "entityCard": {
+    "alleged": "Alleged",
+    "related": "Related",
+    "cases": "Cases",
+    "unknown": "Unknown"
+  },
+  "entityProfile": {
+    "backToEntities": "← Back to Entities",
+    "noEntityId": "No entity ID provided",
+    "invalidEntityId": "Invalid entity ID - must be a numeric Jawaf entity ID",
+    "entityNotFound": "Entity not found",
+    "failedToFetch": "Failed to fetch entity",
+    "invalidId": "Invalid entity ID"
+  },
+  "entityDetail": {
+    "entityNotFound": "Entity not found.",
+    "backToEntities": "Back to Entities",
+    "allegedCases": "Alleged Cases",
+    "relatedCases": "Related Cases",
+    "noAllegedCases": "No alleged cases found.",
+    "noRelatedCases": "No related cases found.",
+    "loading": "Loading entity details...",
+    "activeCases": "Active Cases",
+    "unknown": "Unknown"
   }
 }
 

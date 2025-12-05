@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Entity } from "@/services/api";
 import { Building2, User, Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,14 +10,17 @@ interface EntityProfileHeaderProps {
   entity: Entity;
   allegationCount?: number;
   caseCount?: number;
+  jawafEntityId?: number;
 }
 
 const EntityProfileHeader = ({ 
   entity, 
   allegationCount = 0, 
-  caseCount = 0 
+  caseCount = 0,
+  jawafEntityId
 }: EntityProfileHeaderProps) => {
-  const primaryName = getPrimaryName(entity.names, 'en') || 'Unknown';
+  const { t } = useTranslation();
+  const primaryName = getPrimaryName(entity.names, 'en') || t('entityDetail.unknown');
   const primaryNameNe = getPrimaryName(entity.names, 'ne');
   const position = getAttribute(entity, 'position') || getAttribute(entity, 'role');
   const organization = getAttribute(entity, 'organization');
@@ -48,7 +52,12 @@ const EntityProfileHeader = ({
           {/* Basic Info */}
           <div className="flex-1">
             <div className="mb-4">
-              <h1 className="text-3xl font-bold mb-2">{primaryName}</h1>
+              <h1 className="text-3xl font-bold mb-2">
+                {primaryName}{' '}
+                {jawafEntityId && (
+                  <span className="text-muted-foreground font-mono text-xl">#{jawafEntityId}</span>
+                )}
+              </h1>
               {primaryNameNe && (
                 <p className="text-xl text-muted-foreground mb-2">{primaryNameNe}</p>
               )}
@@ -110,7 +119,7 @@ const EntityProfileHeader = ({
             <Card className="flex-1 bg-muted/50">
               <CardContent className="p-4 text-center">
                 <div className="text-3xl font-bold text-primary">{caseCount}</div>
-                <div className="text-sm text-muted-foreground">Active Cases</div>
+                <div className="text-sm text-muted-foreground">{t('entityDetail.activeCases')}</div>
               </CardContent>
             </Card>
           </div>
