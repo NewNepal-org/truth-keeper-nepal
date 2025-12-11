@@ -285,7 +285,7 @@ const CaseDetail = () => {
                       </div>
                       <div className="flex-1 pb-6">
                         <p className="text-sm font-semibold text-foreground mb-1">
-                          {new Date((item as any).date).toLocaleDateString()}
+                          {new Date(item.date).toLocaleDateString()}
                         </p>
                         <p className="text-sm font-medium text-foreground mb-1">{item.title}</p>
                         <p className="text-sm text-muted-foreground">{item.description}</p>

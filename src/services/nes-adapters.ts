@@ -76,7 +76,7 @@ export function mergeEvidenceAndSources(entity: Entity): EvidenceAndSource[] {
         title: attribution.title?.en?.value || 
                attribution.title?.ne?.value || 
                'Unnamed Source',
-        type: 'document', // Default type for attributions
+        type: inferSourceType(attribution),
         description: attribution.details?.en?.value || 
                     attribution.details?.ne?.value,
       };

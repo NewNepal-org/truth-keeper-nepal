@@ -22,6 +22,51 @@ import type {
 } from '@/types/jds';
 
 // ============================================================================
+// Feedback Types
+// ============================================================================
+
+export type FeedbackType = 'bug' | 'feature' | 'usability' | 'content' | 'general';
+export type ContactMethodType = 'email' | 'phone' | 'whatsapp' | 'instagram' | 'facebook' | 'other';
+
+export interface ContactMethod {
+  type: ContactMethodType;
+  value: string;
+}
+
+export interface ContactInfo {
+  name?: string;
+  contactMethods?: ContactMethod[];
+}
+
+export interface FeedbackSubmission {
+  feedbackType: FeedbackType;
+  subject: string;
+  description: string;
+  relatedPage?: string;
+  contactInfo?: ContactInfo;
+}
+
+export interface FeedbackResponse {
+  id: number;
+  feedbackType: FeedbackType;
+  subject: string;
+  status: string;
+  submittedAt: string;
+  message: string;
+}
+
+export interface ValidationError {
+  [key: string]: string[] | ValidationError;
+}
+
+export interface ApiErrorResponse {
+  error: string;
+  detail?: string;
+  details?: ValidationError;
+  retryAfter?: number;
+}
+
+// ============================================================================
 // Configuration
 // ============================================================================
 
@@ -43,29 +88,45 @@ export class JDSApiError extends Error {
   statusCode?: number;
   endpoint?: string;
   originalError?: unknown;
+  validationErrors?: ValidationError;
+  retryAfter?: number;
 
-  constructor(message: string, statusCode?: number, endpoint?: string, originalError?: unknown) {
+  constructor(
+    message: string,
+    statusCode?: number,
+    endpoint?: string,
+    originalError?: unknown,
+    validationErrors?: ValidationError,
+    retryAfter?: number
+  ) {
     super(message);
     this.name = 'JDSApiError';
     this.statusCode = statusCode;
     this.endpoint = endpoint;
     this.originalError = originalError;
+    this.validationErrors = validationErrors;
+    this.retryAfter = retryAfter;
   }
 }
 
 function handleApiError(error: unknown, endpoint: string): never {
   if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError;
+    const axiosError = error as AxiosError<ApiErrorResponse>;
     const statusCode = axiosError.response?.status;
-    const message = axiosError.response?.data
-      ? JSON.stringify(axiosError.response.data)
-      : axiosError.message;
+    const responseData = axiosError.response?.data;
+
+    // Extract error details
+    const message = responseData?.error || responseData?.detail || axiosError.message;
+    const validationErrors = responseData?.details;
+    const retryAfter = responseData?.retryAfter;
 
     throw new JDSApiError(
       `API Error: ${message}`,
       statusCode,
       endpoint,
-      error
+      error,
+      validationErrors,
+      retryAfter
     );
   }
 
@@ -207,6 +268,47 @@ export async function getStatistics(): Promise<CaseStatistics> {
     return response.data;
   } catch (error) {
     handleApiError(error, '/statistics/');
+  }
+}
+
+// ============================================================================
+// Feedback API Functions
+// ============================================================================
+
+/**
+ * Submit platform feedback.
+ * 
+ * Allows users to submit feedback about the platform including bug reports,
+ * feature requests, usability issues, content feedback, and general comments.
+ * 
+ * Rate Limit: 5 submissions per IP per hour
+ * 
+ * @param feedback - The feedback submission data
+ * @returns Promise<FeedbackResponse> - The created feedback with ID and status
+ * @throws JDSApiError - On validation errors, rate limiting, or server errors
+ * 
+ * @example
+ * ```typescript
+ * const feedback = await submitFeedback({
+ *   feedbackType: 'bug',
+ *   subject: 'Search not working',
+ *   description: 'When I search for cases, nothing happens',
+ *   relatedPage: 'Cases page',
+ *   contactInfo: {
+ *     name: 'राम बहादुर',
+ *     contactMethods: [
+ *       { type: 'email', value: 'ram@example.com' }
+ *     ]
+ *   }
+ * });
+ * ```
+ */
+export async function submitFeedback(feedback: FeedbackSubmission): Promise<FeedbackResponse> {
+  try {
+    const response = await apiClient.post<FeedbackResponse>('/feedback/', feedback);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, '/feedback/');
   }
 }
 

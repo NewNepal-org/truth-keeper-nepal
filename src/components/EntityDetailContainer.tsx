@@ -18,6 +18,7 @@ import { AlertCircle, FileText, Building2, User, Mail, Phone, Globe } from 'luci
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { getPrimaryName, getAttribute, getEmail, getPhone, getWebsite, getDescription, formatSubType } from '@/utils/nes-helpers';
+import type { Case as JDSCase } from '@/types/jds';
 
 interface EntityDetailContainerProps {
   entityId?: string;
@@ -250,7 +251,7 @@ export function EntityDetailContainer({
             <CardContent>
               {allegedCases.length > 0 ? (
                 <div className="space-y-4">
-                  {allegedCases.map((caseItem: any) => (
+                  {allegedCases.map((caseItem: JDSCase) => (
                     <div key={caseItem.id} className="border-b border-border pb-4 last:border-0">
                       <div className="flex justify-between items-start mb-2">
                         <Link to={`/case/${caseItem.id}`} className="font-medium hover:text-primary hover:underline">
@@ -287,7 +288,7 @@ export function EntityDetailContainer({
             <CardContent>
               {relatedCases.length > 0 ? (
                 <div className="space-y-4">
-                  {relatedCases.map((caseItem: any) => (
+                  {relatedCases.map((caseItem: JDSCase) => (
                     <div key={caseItem.id} className="border-b border-border pb-4 last:border-0">
                       <div className="flex justify-between items-start mb-2">
                         <Link to={`/case/${caseItem.id}`} className="font-medium hover:text-primary hover:underline">

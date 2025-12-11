@@ -28,7 +28,7 @@ export interface JawafEntity {
 }
 
 export interface TimelineEntry {
-  event_date: string; // ISO date format
+  date: string; // ISO date format
   title: string;
   description: string;
 }
