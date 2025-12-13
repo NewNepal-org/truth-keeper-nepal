@@ -116,7 +116,7 @@ bun run deploy
   - Production: https://beta.jawafdehi.org/case/175
   - Local equivalent: http://localhost:8080/case/175
 
-**Note**: The production endpoint is https://beta.jawafdehi.org (don't be confused by "beta" in the name - this is the live production site).
+**Note**: Despite having "beta" in the URL, https://beta.jawafdehi.org is the actual production endpoint where the live application runs. This is intentional naming, not a staging environment.
 
 ## Key Principles
 
