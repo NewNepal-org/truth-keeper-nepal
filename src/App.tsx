@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, HydrationBoundary } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
+import { getDehydratedState } from "@/utils/ssr";
 import Index from "./pages/Index";
 import Cases from "./pages/Cases";
 import Entities from "./pages/Entities";
@@ -28,9 +29,7 @@ const App = () => {
   }));
 
   // Get dehydrated state from SSR (if available)
-  const dehydratedState = typeof window !== 'undefined' 
-    ? (window as Window & { __REACT_QUERY_STATE__?: unknown }).__REACT_QUERY_STATE__ 
-    : undefined;
+  const dehydratedState = getDehydratedState();
 
   return (
     <QueryClientProvider client={queryClient}>

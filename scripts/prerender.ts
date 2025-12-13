@@ -47,12 +47,19 @@ async function prerender() {
       queryClient,
     });
 
+    // Safely serialize the dehydrated state to prevent XSS
+    // Replace </script> and other potential XSS vectors
+    const safeDehydratedState = JSON.stringify(dehydratedState)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026');
+
     // Insert the rendered HTML and dehydrated state into the template
     const renderedHtml = template
       .replace('<!--app-html-->', html)
       .replace(
         '</head>',
-        `<script>window.__REACT_QUERY_STATE__ = ${JSON.stringify(dehydratedState)};</script></head>`
+        `<script>window.__REACT_QUERY_STATE__ = ${safeDehydratedState};</script></head>`
       );
 
     // Determine output file path
