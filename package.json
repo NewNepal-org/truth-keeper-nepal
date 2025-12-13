@@ -7,6 +7,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:ssr": "npm run build:ssr:client && npm run build:ssr:server && npm run prerender",
+    "build:ssr:client": "vite build --outDir dist/client",
+    "build:ssr:server": "VITE_SSR_BUILD=true vite build --ssr src/entry-server.tsx --outDir dist/server",
+    "prerender": "tsx scripts/prerender.ts",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -90,6 +94,7 @@
     "lovable-tagger": "^1.1.11",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
