@@ -54,6 +54,7 @@ export interface Case {
   case_id: string; // Unique identifier shared across versions
   case_type: CaseType;
   title: string;
+  thumbnail_url?: string | null; // Optional thumbnail image URL
   case_start_date: string | null; // ISO date format
   case_end_date: string | null; // ISO date format
   alleged_entities: JawafEntity[]; // Entities alleged to be involved
