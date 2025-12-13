@@ -1,68 +1,57 @@
 # Case Detail Layout Screenshots
 
-## Important Note
+Screenshots of all four layout variants captured with real data from portal.jawafdehi.org API (Case #175).
 
-The screenshots captured during automated testing show "Failed to load case details" error states. This is because the automated screenshot tool had port mismatch issues (server started on port 8083 but script used port 8080).
-
-## How to View Working Layouts
-
-To see the fully functional layouts with actual case data, please visit:
-
-### Live Preview URLs
-
-**Layout Selector:**
-- https://beta.jawafdehi.org/case/175/layout/selector
-
-**Individual Layouts:**
-- **Layout 1 (Hero Image):** https://beta.jawafdehi.org/case/175/layout/1
-- **Layout 2 (Side-by-Side):** https://beta.jawafdehi.org/case/175/layout/2
-- **Layout 3 (Card-Based):** https://beta.jawafdehi.org/case/175/layout/3
-- **Layout 4 (Compact Inline):** https://beta.jawafdehi.org/case/175/layout/4
-
-## Layout Descriptions
+## Screenshots
 
 ### Layout 1: Hero Image with Overlay
-- Full-width hero image (500px height)
-- Title and metadata overlaid on image with gradient
-- Dramatic, magazine-style presentation
-- **Visual Impact:** ⭐⭐⭐⭐⭐
+- **Viewport**: `layout-1-viewport.png` - Above-the-fold view
+- **Full Page**: `layout-1-full.png` - Complete scrollable page
+
+Features a dramatic full-width hero image with title and metadata overlaid.
 
 ### Layout 2: Side-by-Side
-- Two-column layout with sticky image
-- Metadata organized in sidebar cards
-- Professional, report-style presentation
-- **Visual Impact:** ⭐⭐⭐⭐
+- **Viewport**: `layout-2-viewport.png` - Above-the-fold view  
+- **Full Page**: `layout-2-full.png` - Complete scrollable page
+
+Two-column professional layout with sticky image sidebar.
 
 ### Layout 3: Card-Based (Recommended)
-- Featured image in card (400px height)
-- Three-column metadata grid
-- Clean, modular design
-- **Visual Impact:** ⭐⭐⭐⭐
-- **Best for general use**
+- **Viewport**: `layout-3-viewport.png` - Above-the-fold view
+- **Full Page**: `layout-3-full.png` - Complete scrollable page
+
+Clean modular design with featured image card and metadata grid.
 
 ### Layout 4: Compact Inline
-- Floating image to right (desktop)
-- Inline metadata, compact format
-- Traditional article style
-- **Visual Impact:** ⭐⭐⭐
+- **Viewport**: `layout-4-viewport.png` - Above-the-fold view
+- **Full Page**: `layout-4-full.png` - Complete scrollable page
 
-## Test Image Used
+Traditional article style with floating image and inline metadata.
 
-All layouts use the thumbnail image:
+### Layout Selector
+- **Full Page**: `layout-selector.png` - Layout selection interface
+
+## Test Case
+
+All screenshots use Case #175 from the production API with the test thumbnail:
 ```
 https://s3.jawafdehi.org/cases/giribandhu/giribandhu-tea-estate.jpeg
 ```
 
-## Viewing Instructions
+## Live Previews
 
-1. Visit the layout selector URL above
-2. Click on any layout card to preview that layout
-3. Use the "Back to Layout Selector" button to try different layouts
-4. Test on different devices (mobile, tablet, desktop)
+You can also view these layouts live at:
+- **Selector**: https://beta.jawafdehi.org/case/175/layout/selector
+- **Layout 1**: https://beta.jawafdehi.org/case/175/layout/1
+- **Layout 2**: https://beta.jawafdehi.org/case/175/layout/2
+- **Layout 3**: https://beta.jawafdehi.org/case/175/layout/3
+- **Layout 4**: https://beta.jawafdehi.org/case/175/layout/4
 
-## Next Steps
+## Technical Notes
 
-After reviewing the live layouts:
-1. Select preferred layout design
-2. Provide feedback on any adjustments needed
-3. The selected layout will be applied to the main CaseDetail component
+Screenshots were captured using Playwright with:
+- Viewport size: 1920x1080
+- Browser: Chromium (headless)
+- SSL certificate validation bypassed for portal.jawafdehi.org
+- Wait time: 8 seconds after page load for API data to populate
+

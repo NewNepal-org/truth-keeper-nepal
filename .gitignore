@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 .env
 
-# Screenshots and temporary files
-screenshots/
+# Temporary screenshot scripts
+screenshot.mjs
 capture-screenshots.cjs
