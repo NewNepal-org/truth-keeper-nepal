@@ -9,6 +9,7 @@ import Entities from "./pages/Entities";
 import About from "./pages/About";
 import Information from "./pages/Information";
 import CaseDetail from "./pages/CaseDetail";
+import CaseDetailLayoutDemo from "./pages/CaseDetailLayoutDemo";
 import EntityProfile from "./pages/EntityProfile";
 import ReportAllegation from "./pages/ReportAllegation";
 import EntityResponse from "./pages/EntityResponse";
@@ -28,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/case/:id" element={<CaseDetail />} />
+          <Route path="/case/:id/layout/selector" element={<CaseDetailLayoutDemo />} />
+          <Route path="/case/:id/layout/:layout" element={<CaseDetailLayoutDemo />} />
           <Route path="/entities" element={<Entities />} />
           <Route path="/entity/:id" element={<EntityProfile />} />
           <Route path="/report" element={<ReportAllegation />} />
