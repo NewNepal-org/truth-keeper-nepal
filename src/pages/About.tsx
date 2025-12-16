@@ -47,18 +47,17 @@ const teamMembers: TeamMember[] = [
       { type: "linkedin", value: "https://www.linkedin.com/in/sbashyal/" },
     ],
   },
-  // {
-  //   displayName: {
-  //     en: "Arjun Tamang",
-  //     ne: "अर्जुन तामाङ",
-  //   },
-  //   description: "Outreach & Community Coordinator",
-  //   contacts: [
-  //     { type: "email", value: "arjun.tamang@example.com" },
-  //     { type: "linkedin", value: "https://linkedin.com/in/arjuntamang" },
-  //     { type: "facebook", value: "https://facebook.com/arjuntamang" },
-  //   ],
-  // },
+  {
+    displayName: {
+      en: "Jenish Khanal",
+      ne: "जेनिस खनाल",
+    },
+    description: "Bachelor of Computer Engineering (Running); Technical Assistant at Gandaki University; From Pokhara, Nepal",
+    thumb: "https://s3.jawafdehi.org/team/jenish.jpeg",
+    contacts: [
+      { type: "linkedin", value: "https://www.linkedin.com/in/jenish-khanal-709458201/" },
+    ],
+  },
 ];
 
 const About = () => {
