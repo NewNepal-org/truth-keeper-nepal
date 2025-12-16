@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Users, Eye, Target, CheckCircle2, Mail, Linkedin, Facebook, Github } from "lucide-react";
+import { Shield, Users, Eye, Target, CheckCircle2, Mail, Linkedin, Facebook, Github, Globe } from "lucide-react";
 import { Mermaid } from "@/components/Mermaid";
 
-type ContactType = "email" | "facebook" | "linkedin" | "github";
+type ContactType = "email" | "facebook" | "linkedin" | "github" | "website";
 
 interface Contact {
   type: ContactType;
@@ -49,6 +49,18 @@ const teamMembers: TeamMember[] = [
   },
   {
     displayName: {
+      en: "Medha Sharma",
+      ne: "मेधा शर्मा",
+    },
+    description: "President, Visible Impact; Volunteer, Let's Build Nepal",
+    thumb: "https://s3.jawafdehi.org/team/medha2.jpeg",
+    contacts: [
+      { type: "linkedin", value: "https://www.linkedin.com/in/shmedha/" },
+      { type: "email", value: "shmedha@gmail.com" },
+    ],
+  },
+  {
+    displayName: {
       en: "Jenish Khanal",
       ne: "जेनिस खनाल",
     },
@@ -56,6 +68,18 @@ const teamMembers: TeamMember[] = [
     thumb: "https://s3.jawafdehi.org/team/jenish.jpeg",
     contacts: [
       { type: "linkedin", value: "https://www.linkedin.com/in/jenish-khanal-709458201/" },
+    ],
+  },
+  {
+    displayName: {
+      en: "Rohan Raj Gautam",
+      ne: "रोहन राज गौतम",
+    },
+    description: "Software Engineer; Volunteer, Let's Build Nepal",
+    thumb: "https://s3.jawafdehi.org/team/rohan2.jpg",
+    contacts: [
+      { type: "linkedin", value: "https://www.linkedin.com/in/rohanrajgautam/" },
+      { type: "website", value: "https://rrg.com.np/" },
     ],
   },
 ];
@@ -152,6 +176,7 @@ const About = () => {
                               {contact.type === "linkedin" && <Linkedin className="h-5 w-5" />}
                               {contact.type === "facebook" && <Facebook className="h-5 w-5" />}
                               {contact.type === "github" && <Github className="h-5 w-5" />}
+                              {contact.type === "website" && <Globe className="h-5 w-5" />}
                             </a>
                           ))}
                         </div>
