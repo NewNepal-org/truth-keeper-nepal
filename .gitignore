@@ -26,3 +26,4 @@ dist-ssr
 
 # We use bun
 package-lock.json
+test-results/
